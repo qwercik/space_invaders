@@ -1,6 +1,7 @@
 #pragma once
 
 #include <space_invaders/model/Model.hpp>
+#include <vector>
 
 namespace space_invaders::model {
     class BasicModel : public Model {
@@ -8,10 +9,10 @@ namespace space_invaders::model {
         virtual void draw() const override;
 
     protected:
-        virtual unsigned getVerticesNumber() const = 0;
-        virtual const float *getVerticesArray() const = 0;
-        virtual const float *getNormalVectorsArray() const = 0;
-        virtual const float *getTexturingCoordinatesArray() const = 0;
-        virtual const float *getColorsArray() const = 0;
+        unsigned verticesNumber;
+        std::vector<float> vertices;
+        std::vector<float> normalVectors;
+        std::vector<float> texturingCoordinates;
+        std::vector<float> colors;
     };
 }

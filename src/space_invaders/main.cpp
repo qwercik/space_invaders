@@ -10,12 +10,14 @@
 #include <space_invaders/shader/LambertShaderSet.hpp>
 #include <space_invaders/model/Teapot.hpp>
 #include <space_invaders/model/Cube.hpp>
+#include <space_invaders/model/ModelFromFile.hpp>
 #include <space_invaders/model/HierarchicalModel.hpp>
 
 using space_invaders::window::Window;
 using space_invaders::shader::LambertShaderSet;
 using space_invaders::model::Teapot;
 using space_invaders::model::Cube;
+using space_invaders::model::ModelFromFile;
 using space_invaders::model::HierarchicalModel;
 
 int main() {
@@ -23,15 +25,20 @@ int main() {
     LambertShaderSet shaders;
     Teapot teapot;
     Cube cube;
-
-    int counter = 0;
-
+    ModelFromFile shuttle("../models/shuttle.obj");
+    if (!shuttle.isOk()) {
+        std::cerr << "Could not read obj file\n";
+        return 1;
+    }
+    
     auto viewMatrix = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, -10.0f),
+        glm::vec3(0.0f, 0.0f, -15.0f),
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    auto perspectiveMatrix = glm::perspective(50.0f * 3.14159f / 180.0f, 1.0f, 1.0f, 50.0f);
+    auto perspectiveMatrix = glm::perspective(50.0f * 3.14159f / 180.0f, 1.0f, 1.0f, 80.f);
+
+    int counter = 0;
 
     window
         .onInit([]() {
@@ -39,28 +46,13 @@ int main() {
             glEnable(GL_DEPTH_TEST);
         })
         .onLoop([&]() {
-            HierarchicalModel(glm::rotate(glm::mat4(1.0f), counter / 180.0f, glm::vec3(1.0f, 0.f, 0.f)), [&](const HierarchicalModel& model) {
+            HierarchicalModel(glm::rotate(glm::mat4(1.0f), counter / 180.0f, glm::vec3(1.0f, 1.0f, 1.0f)), [&](const HierarchicalModel& model) {
                 shaders.use();
                 glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(model.calculateEffectiveModelMatrix()));
                 glUniformMatrix4fv(shaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
                 glUniformMatrix4fv(shaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
-                teapot.draw();
-            })
-                .addChild(std::make_unique<HierarchicalModel>(glm::translate(glm::rotate(glm::mat4(1.0f), counter / 180.0f, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(-4.0f, 0.0f, 0.0f)), [&](const HierarchicalModel& model) {
-                    shaders.use();
-                    glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(model.calculateEffectiveModelMatrix()));
-                    glUniformMatrix4fv(shaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
-                    glUniformMatrix4fv(shaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
-                    teapot.draw();
-                }))
-                .addChild(std::make_unique<HierarchicalModel>(glm::translate(glm::rotate(glm::mat4(1.0f), -counter / 180.0f, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(2.0f, 0.0f, 0.0f)), [&](const HierarchicalModel& model) {
-                    shaders.use();
-                    glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(model.calculateEffectiveModelMatrix()));
-                    glUniformMatrix4fv(shaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
-                    glUniformMatrix4fv(shaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
-                    teapot.draw();
-                }))
-                .draw();
+                shuttle.draw();
+            }).draw();
 
             counter += 3;
         });

@@ -12,7 +12,6 @@ namespace space_invaders::model {
         HierarchicalModel(glm::mat4&& modelMatrix, std::function<void(const HierarchicalModel&)> drawingCallback);
         HierarchicalModel(HierarchicalModel&& model);
 
-
         HierarchicalModel& addChild(std::unique_ptr<HierarchicalModel>&& child);
         glm::mat4& getModelMatrix();
         const glm::mat4& getModelMatrix() const;

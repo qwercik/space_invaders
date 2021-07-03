@@ -23,11 +23,13 @@ add_executable(space_invaders
     # Models
     include/space_invaders/model/Model.hpp
     include/space_invaders/model/BasicModel.hpp
+    include/space_invaders/model/ModelFromFile.hpp
     include/space_invaders/model/HierarchicalModel.hpp
     include/space_invaders/model/Cube.hpp
     include/space_invaders/model/Teapot.hpp
     src/space_invaders/model/Model.cpp
     src/space_invaders/model/BasicModel.cpp
+    src/space_invaders/model/ModelFromFile.cpp
     src/space_invaders/model/HierarchicalModel.cpp
     src/space_invaders/model/Cube.cpp
     src/space_invaders/model/Teapot.cpp
@@ -35,6 +37,9 @@ add_executable(space_invaders
     # Window management and OpenGL initializing
     include/space_invaders/window/Window.hpp
     src/space_invaders/window/Window.cpp
+
+    # Library for loading OBJ files
+    include/obj_loader/obj_loader.h
 )
 target_include_directories(space_invaders PUBLIC include/)
 target_link_libraries(space_invaders PUBLIC -lGL -lglfw -lGLEW)

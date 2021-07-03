@@ -7,12 +7,12 @@ namespace space_invaders::model {
             glEnableVertexAttribArray(i);
         }
 
-        glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, this->getVerticesArray());
-        glVertexAttribPointer(1, 4, GL_FLOAT, false, 0, this->getNormalVectorsArray());
-        glVertexAttribPointer(2, 4, GL_FLOAT, false, 0, this->getTexturingCoordinatesArray());
-        glVertexAttribPointer(3, 4, GL_FLOAT, false, 0, this->getColorsArray());
+        glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, this->vertices.data());
+        glVertexAttribPointer(1, 4, GL_FLOAT, false, 0, this->normalVectors.data());
+        glVertexAttribPointer(2, 4, GL_FLOAT, false, 0, this->texturingCoordinates.data());
+        glVertexAttribPointer(3, 4, GL_FLOAT, false, 0, this->colors.data());
 
-        glDrawArrays(GL_TRIANGLES, 0, this->getVerticesNumber());
+        glDrawArrays(GL_TRIANGLES, 0, this->verticesNumber);
         
         for (int i = 0; i < 4; i++) {
             glDisableVertexAttribArray(i);
