@@ -1,6 +1,7 @@
 #define GLM_FORCE_RADIANS
 
 #include <iostream>
+#include <memory>
 #include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -8,41 +9,60 @@
 #include <space_invaders/window/Window.hpp>
 #include <space_invaders/shader/LambertShaderSet.hpp>
 #include <space_invaders/model/Teapot.hpp>
+#include <space_invaders/model/Cube.hpp>
+#include <space_invaders/model/HierarchicalModel.hpp>
 
 using space_invaders::window::Window;
 using space_invaders::shader::LambertShaderSet;
 using space_invaders::model::Teapot;
+using space_invaders::model::Cube;
+using space_invaders::model::HierarchicalModel;
 
 int main() {
-    Window window("Space Invaders", 400, 400, false);
+    Window window("Space Invaders", 400, 400, true);
     LambertShaderSet shaders;
     Teapot teapot;
+    Cube cube;
 
     int counter = 0;
 
+    auto viewMatrix = glm::lookAt(
+        glm::vec3(0.0f, 0.0f, -10.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+    auto perspectiveMatrix = glm::perspective(50.0f * 3.14159f / 180.0f, 1.0f, 1.0f, 50.0f);
+
     window
-        .onInit([&]() {
+        .onInit([]() {
             glClearColor(1.f, 0.5f, 0.2f, 1.f);
             glEnable(GL_DEPTH_TEST);
         })
         .onLoop([&]() {
-            auto mMatrix = glm::rotate(glm::mat4(1.0f), counter * 2.0f * 3.14159f / 180.0f, glm::vec3(0.0f, 1.0f, 1.0f));
-            auto vMatrix = glm::lookAt(
-                glm::vec3(0.0f, 0.0f, -5.0f),
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(0.0f, 1.0f, 0.0f)
-            );
-            auto pMatrix = glm::perspective(50.0f * 3.14159f / 180.0f, 1.0f, 1.0f, 50.0f);
+            HierarchicalModel(glm::rotate(glm::mat4(1.0f), counter / 180.0f, glm::vec3(1.0f, 0.f, 0.f)), [&](const HierarchicalModel& model) {
+                shaders.use();
+                glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(model.calculateEffectiveModelMatrix()));
+                glUniformMatrix4fv(shaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+                glUniformMatrix4fv(shaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+                teapot.draw();
+            })
+                .addChild(std::make_unique<HierarchicalModel>(glm::translate(glm::rotate(glm::mat4(1.0f), counter / 180.0f, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(-4.0f, 0.0f, 0.0f)), [&](const HierarchicalModel& model) {
+                    shaders.use();
+                    glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(model.calculateEffectiveModelMatrix()));
+                    glUniformMatrix4fv(shaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+                    glUniformMatrix4fv(shaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+                    teapot.draw();
+                }))
+                .addChild(std::make_unique<HierarchicalModel>(glm::translate(glm::rotate(glm::mat4(1.0f), -counter / 180.0f, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(2.0f, 0.0f, 0.0f)), [&](const HierarchicalModel& model) {
+                    shaders.use();
+                    glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(model.calculateEffectiveModelMatrix()));
+                    glUniformMatrix4fv(shaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+                    glUniformMatrix4fv(shaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+                    teapot.draw();
+                }))
+                .draw();
 
-            shaders.use();
-            glUniformMatrix4fv(shaders.uniform("P"), 1, false, glm::value_ptr(pMatrix)); 
-            glUniformMatrix4fv(shaders.uniform("V"), 1, false, glm::value_ptr(vMatrix)); 
-            glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(mMatrix));
-            glUniform4f(shaders.uniform("color"), 0.25f, 0.5f, 0.75f, 1.f);
-
-            teapot.drawOutline();
-
-            counter++;
+            counter += 3;
         });
 
     return window.run();
