@@ -40,7 +40,7 @@ int main() {
             glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(mMatrix));
             glUniform4f(shaders.uniform("color"), 0.25f, 0.5f, 0.75f, 1.f);
 
-            teapot.draw();
+            teapot.drawOutline();
 
             counter++;
         });

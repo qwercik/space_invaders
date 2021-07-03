@@ -12,7 +12,7 @@ namespace space_invaders::window {
 
         Window& onInit(std::function<void()> initCallback);
         Window& onLoop(std::function<void()> loopCallback);
-        Window& onExit(std::function<void()> loopCallback);
+        Window& onExit(std::function<void()> exitCallback);
         
         int run();
 
@@ -22,8 +22,8 @@ namespace space_invaders::window {
         GLFWwindow *window;
         bool ok = true;
 
-        std::function<void()> initCallback;
-        std::function<void()> loopCallback;
-        std::function<void()> exitCallback;
+        std::function<void()> initCallback = []() {};
+        std::function<void()> loopCallback = []() {};
+        std::function<void()> exitCallback = []() {};
     };
 }

@@ -37,13 +37,13 @@ namespace space_invaders::window {
 
             this->loopCallback(); 
 
-            glfwSwapBuffers(window);
+            glfwSwapBuffers(this->window);
             glfwPollEvents();
         }
 
         this->exitCallback();
 
-        glfwDestroyWindow(window);
+        glfwDestroyWindow(this->window);
         glfwTerminate();
         
         return EXIT_SUCCESS;
