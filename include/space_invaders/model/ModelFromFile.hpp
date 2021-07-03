@@ -7,7 +7,7 @@ namespace space_invaders::model {
     class ModelFromFile : public BasicModel {
     public:
         ModelFromFile(const std::string& filename);
-        bool isOk() const;
+        operator bool() const;
 
     private:
         bool ok = false;

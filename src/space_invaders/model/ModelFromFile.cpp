@@ -27,14 +27,14 @@ namespace space_invaders::model {
             this->texturingCoordinates.push_back(vertex.TextureCoordinate.Y);
 
             for (int i = 0; i < 4; i++) {
-                this->colors.push_back(static_cast<float>(i));
+                this->colors.push_back(static_cast<float>(1.0f));
             }
 
             this->verticesNumber++;
         }
     }
     
-    bool ModelFromFile::isOk() const {
+    ModelFromFile::operator bool() const {
         return this->ok;
     }
 }
