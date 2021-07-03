@@ -10,8 +10,10 @@ $ cmake ..
 $ make
 ```
 
-To run the game:
-```
+To run the game you can use on of the following commands:
+```bash
 ./space_invaders
+make run
+make run-mesa # Forces MESA version to minimal required, use if your graphics card is too old
 ```
 
