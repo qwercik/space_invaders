@@ -8,13 +8,17 @@ add_executable(space_invaders
 
     # File with some helpful functions
     include/space_invaders/utils.hpp
+    src/space_invaders/utils.cpp
 
     # Shader loading and unloading system implementation
     include/space_invaders/shader/Shader.hpp
     include/space_invaders/shader/ShaderSet.hpp
-    src/space_invaders/utils.cpp
+    include/space_invaders/shader/ConstantShaderSet.hpp
+    include/space_invaders/shader/LambertShaderSet.hpp
     src/space_invaders/shader/Shader.cpp
     src/space_invaders/shader/ShaderSet.cpp
+    src/space_invaders/shader/ConstantShaderSet.cpp
+    src/space_invaders/shader/LambertShaderSet.cpp
 
     # Models
     include/space_invaders/model/Model.hpp
