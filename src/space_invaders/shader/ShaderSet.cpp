@@ -28,6 +28,10 @@ namespace space_invaders::shader {
     void ShaderSet::link() {
         glLinkProgram(this->handle);
     }
+    
+    void ShaderSet::use() {
+        glUseProgram(this->handle);
+    }
    
     std::optional<std::string> ShaderSet::getLog() {
         return utils::obtainOpenGlLog(this->handle, glGetProgramiv, glGetProgramInfoLog);

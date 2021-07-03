@@ -13,6 +13,7 @@ namespace space_invaders::shader {
 
         ShaderSet& attach(const Shader& shader);
         void link();
+        void use();
 
         std::optional<std::string> getLog();
 

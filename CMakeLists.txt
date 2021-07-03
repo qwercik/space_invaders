@@ -27,6 +27,7 @@ add_executable(space_invaders
     include/space_invaders/model/Teapot.hpp
     src/space_invaders/model/Model.cpp
     src/space_invaders/model/BasicModel.cpp
+    src/space_invaders/model/Cube.cpp
     src/space_invaders/model/Teapot.cpp
 
     # Window management and OpenGL initializing
