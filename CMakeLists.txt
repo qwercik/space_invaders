@@ -3,14 +3,28 @@ cmake_minimum_required(VERSION 3.0.0)
 project(space_invaders)
 
 add_executable(space_invaders
+    # Main file of project
     src/space_invaders/main.cpp
 
+    # File with some helpful functions
     include/space_invaders/utils.hpp
+
+    # Shader loading and unloading system implementation
     include/space_invaders/shader/Shader.hpp
     include/space_invaders/shader/ShaderSet.hpp
     src/space_invaders/utils.cpp
     src/space_invaders/shader/Shader.cpp
     src/space_invaders/shader/ShaderSet.cpp
+
+    # Models
+    include/space_invaders/model/Model.hpp
+    include/space_invaders/model/BasicModel.hpp
+    include/space_invaders/model/Cube.hpp
+    src/space_invaders/model/Model.cpp
+    src/space_invaders/model/BasicModel.cpp
+    src/space_invaders/model/Cube.cpp
+
+
 )
 target_include_directories(space_invaders PUBLIC include/)
 target_link_libraries(space_invaders PUBLIC -lGL -lglfw -lGLEW)
