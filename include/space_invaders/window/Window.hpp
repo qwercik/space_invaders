@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-namespace space_invaders {
+namespace space_invaders::window {
     class Window {
     public:
         Window(const std::string& title, unsigned width, unsigned height, bool resizable);

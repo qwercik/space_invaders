@@ -5,11 +5,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <space_invaders/Window.hpp>
+#include <space_invaders/window/Window.hpp>
 #include <space_invaders/shader/LambertShaderSet.hpp>
 #include <space_invaders/model/Teapot.hpp>
 
-using space_invaders::Window;
+using space_invaders::window::Window;
 using space_invaders::shader::LambertShaderSet;
 using space_invaders::model::Teapot;
 
@@ -38,6 +38,7 @@ int main() {
             glUniformMatrix4fv(shaders.uniform("P"), 1, false, glm::value_ptr(pMatrix)); 
             glUniformMatrix4fv(shaders.uniform("V"), 1, false, glm::value_ptr(vMatrix)); 
             glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(mMatrix));
+            glUniform4f(shaders.uniform("color"), 0.25f, 0.5f, 0.75f, 1.f);
 
             teapot.draw();
 

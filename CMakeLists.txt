@@ -31,8 +31,8 @@ add_executable(space_invaders
     src/space_invaders/model/Teapot.cpp
 
     # Window management and OpenGL initializing
-    include/space_invaders/Window.hpp
-    src/space_invaders/Window.cpp
+    include/space_invaders/window/Window.hpp
+    src/space_invaders/window/Window.cpp
 )
 target_include_directories(space_invaders PUBLIC include/)
 target_link_libraries(space_invaders PUBLIC -lGL -lglfw -lGLEW)

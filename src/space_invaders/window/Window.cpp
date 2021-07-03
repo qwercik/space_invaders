@@ -1,11 +1,11 @@
-#include <space_invaders/Window.hpp>
+#include <space_invaders/window/Window.hpp>
 #include <iostream>
 #include <string>
 #include <cstdio>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-namespace space_invaders {
+namespace space_invaders::window {
     Window::Window(const std::string& title, unsigned width, unsigned height, bool resizable) {
         this->ok = this->initialize(title, width, height, resizable);
     }
