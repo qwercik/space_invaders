@@ -8,32 +8,36 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <space_invaders/window/Window.hpp>
 #include <space_invaders/shader/ConstantShaderSet.hpp>
-#include <space_invaders/shader/LambertShaderSet.hpp>
+#include <space_invaders/shader/LambertTexturedShaderSet.hpp>
+#include <space_invaders/model/TexturedModel.hpp>
 #include <space_invaders/model/Teapot.hpp>
 #include <space_invaders/model/Cube.hpp>
-#include <space_invaders/model/ModelFromFile.hpp>
 #include <space_invaders/model/HierarchicalModel.hpp>
 
 using space_invaders::window::Window;
-using space_invaders::shader::LambertShaderSet;
-using space_invaders::model::ModelFromFile;
+using space_invaders::shader::LambertTexturedShaderSet;
 using space_invaders::model::HierarchicalModel;
+using space_invaders::model::Cube;
+using space_invaders::model::Teapot;
+using space_invaders::model::TexturedModel;
 
 int main() {
     Window window("Space Invaders", 400, 400, true);
-    LambertShaderSet shaders;
-    ModelFromFile minicooper("../models/minicooper.obj");
+    LambertTexturedShaderSet shaders;
+    // TexturedModel minicooper("../models/minicooper.obj", "../textures/bricks.png");
+    TexturedModel minicooper(Teapot(), "../textures/bricks.png");
+
     if (!minicooper) {
         std::cerr << "Could not read obj file\n";
         return 1;
     }
     
     auto viewMatrix = glm::lookAt(
-        glm::vec3(0.0f, 100.0f, -200.0f),
-        glm::vec3(0.0f, 20.0f, 10.0f),
+        glm::vec3(0.0f, 2.0f, -5.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    auto perspectiveMatrix = glm::perspective(50.0f * 3.14159f / 180.0f, 1.0f, 100.0f, 400.f);
+    auto perspectiveMatrix = glm::perspective(50.0f * 3.14159f / 180.0f, 1.0f, 1.0f, 10.f);
 
     int counter = 0;
 
