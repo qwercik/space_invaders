@@ -14,9 +14,9 @@ namespace space_invaders::shader {
         glShaderSource(this->handle, 1, &pointer, NULL);
         glCompileShader(this->handle);
 
-        auto log = this->getLog();
-        if (log) {
-            std::cout << log.value() << '\n';
+        std::string log = this->getLog();
+        if (!log.empty()) {
+            std::cout << log << '\n';
         }
     }
 
@@ -28,7 +28,7 @@ namespace space_invaders::shader {
         return this->handle;
     }
 
-    std::optional<std::string> Shader::getLog() {
+    std::string Shader::getLog() {
         return utils::obtainOpenGlLog(this->handle, glGetShaderiv, glGetShaderInfoLog);
     }
 }

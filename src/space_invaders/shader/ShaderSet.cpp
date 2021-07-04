@@ -33,7 +33,7 @@ namespace space_invaders::shader {
         glUseProgram(this->handle);
     }
    
-    std::optional<std::string> ShaderSet::getLog() {
+    std::string ShaderSet::getLog() {
         return utils::obtainOpenGlLog(this->handle, glGetProgramiv, glGetProgramInfoLog);
     }
 

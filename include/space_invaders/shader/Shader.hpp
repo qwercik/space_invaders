@@ -12,7 +12,7 @@ namespace space_invaders::shader {
         ~Shader();
 
         GLuint getHandle() const; 
-        std::optional<std::string> getLog();
+        std::string getLog();
 
     private:
         GLuint handle;

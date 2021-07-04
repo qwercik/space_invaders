@@ -15,7 +15,7 @@ namespace space_invaders::shader {
         void link();
         void use();
 
-        std::optional<std::string> getLog();
+        std::string getLog();
 
         GLuint uniform(const std::string& variable) const;
         GLuint attribute(const std::string& variable) const;
