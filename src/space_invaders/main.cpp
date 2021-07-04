@@ -50,8 +50,8 @@ int main() {
                 glUniformMatrix4fv(shaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
                 glUniformMatrix4fv(shaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
                 glUniform4f(shaders.uniform("color"), 0.0f, 1.0f, 0.0f, 1.0f);
-                minicooper.draw();
-            }).draw();
+                minicooper.draw(shaders);
+            }).draw(shaders);
 
             counter++;
         });

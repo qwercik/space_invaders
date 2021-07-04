@@ -1,8 +1,9 @@
 #include <space_invaders/model/BasicModel.hpp>
+#include <space_invaders/shader/ShaderSet.hpp>
 #include <GL/glew.h>
 
 namespace space_invaders::model {
-    void BasicModel::draw() const {
+    void BasicModel::draw(const shader::ShaderSet& shaders) const {
         for (int i = 0; i < 4; i++) {
             glEnableVertexAttribArray(i);
         }
