@@ -73,7 +73,7 @@ if(MSVC)
         ${OPENGL_LIBRARIES}
     )
 else()
-    target_link_libraries(space_invaders PUBLIC -lGL -lglfw -lGLEW)
+    target_link_libraries(space_invaders PUBLIC -lGL -lglfw -lGLEW lodepng)
     target_compile_options(space_invaders PUBLIC -Wall -Wextra -Wpedantic -O2)
 endif()
 
