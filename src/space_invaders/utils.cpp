@@ -13,7 +13,7 @@ namespace space_invaders::utils {
         return buffer.str();
     }
 
-    std::optional<std::string> obtainOpenGlLog(
+    std::string obtainOpenGlLog(
         GLuint handle,
         std::function<void(GLuint, GLenum, GLint*)> parameterFunction,
         std::function<void(GLuint, GLsizei, GLsizei*, GLchar*)> logFunction
@@ -28,6 +28,6 @@ namespace space_invaders::utils {
             return std::string(buffer.begin(), buffer.end());
         }
 
-        return std::nullopt;
+        return "";
     }
 }
