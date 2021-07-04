@@ -1,6 +1,7 @@
 #pragma once
 
 #include <space_invaders/model/Model.hpp>
+#include <space_invaders/shader/ShaderSet.hpp>
 #include <glm/glm.hpp>
 #include <functional>
 #include <memory>
@@ -17,7 +18,7 @@ namespace space_invaders::model {
         const glm::mat4& getModelMatrix() const;
         glm::mat4 calculateEffectiveModelMatrix() const;
 
-        virtual void draw() const override;
+        virtual void draw(const shader::ShaderSet& shaders) const override;
 
     private:
         std::function<void(const HierarchicalModel&)> drawingCallback;

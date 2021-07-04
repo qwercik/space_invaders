@@ -1,5 +1,6 @@
 #include <space_invaders/model/Model.hpp>
 #include <space_invaders/model/HierarchicalModel.hpp>
+#include <space_invaders/shader/ShaderSet.hpp>
 #include <glm/glm.hpp>
 #include <memory>
 #include <list>
@@ -41,11 +42,11 @@ namespace space_invaders::model {
         }
     }
     
-    void HierarchicalModel::draw() const {
+    void HierarchicalModel::draw(const shader::ShaderSet& shaders) const {
         this->drawingCallback(*this);
 
         for (const auto& child : this->children) {
-            child->draw();
+            child->draw(shaders);
         }
     }
 }

@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.0.0)
 
 project(space_invaders)
 
+add_library(lodepng
+    include/lodepng/lodepng.hpp
+    src/lodepng/lodepng.cpp
+)
+target_include_directories(lodepng PUBLIC include/)
+
+
 add_executable(space_invaders
     # Main file of project
     src/space_invaders/main.cpp
@@ -15,24 +22,34 @@ add_executable(space_invaders
     include/space_invaders/shader/ShaderSet.hpp
     include/space_invaders/shader/ConstantShaderSet.hpp
     include/space_invaders/shader/LambertShaderSet.hpp
+    include/space_invaders/shader/TexturedShaderSet.hpp
+    include/space_invaders/shader/LambertTexturedShaderSet.hpp
     src/space_invaders/shader/Shader.cpp
     src/space_invaders/shader/ShaderSet.cpp
     src/space_invaders/shader/ConstantShaderSet.cpp
     src/space_invaders/shader/LambertShaderSet.cpp
+    src/space_invaders/shader/TexturedShaderSet.cpp
+    src/space_invaders/shader/LambertTexturedShaderSet.cpp
 
     # Models
     include/space_invaders/model/Model.hpp
     include/space_invaders/model/BasicModel.hpp
-    include/space_invaders/model/ModelFromFile.hpp
+    include/space_invaders/model/ColoredModel.hpp
+    include/space_invaders/model/TexturedModel.hpp
     include/space_invaders/model/HierarchicalModel.hpp
     include/space_invaders/model/Cube.hpp
     include/space_invaders/model/Teapot.hpp
     src/space_invaders/model/Model.cpp
     src/space_invaders/model/BasicModel.cpp
-    src/space_invaders/model/ModelFromFile.cpp
+    src/space_invaders/model/ColoredModel.cpp
+    src/space_invaders/model/TexturedModel.cpp
     src/space_invaders/model/HierarchicalModel.cpp
     src/space_invaders/model/Cube.cpp
     src/space_invaders/model/Teapot.cpp
+
+    # Texture management
+    include/space_invaders/texture/Texture.hpp
+    src/space_invaders/texture/Texture.cpp
 
     # Window management and OpenGL initializing
     include/space_invaders/window/Window.hpp
