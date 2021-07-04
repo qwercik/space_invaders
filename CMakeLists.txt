@@ -59,10 +59,23 @@ add_executable(space_invaders
     include/obj_loader/obj_loader.h
 )
 target_include_directories(space_invaders PUBLIC include/)
-target_link_libraries(space_invaders PUBLIC -lGL -lglfw -lGLEW lodepng)
 target_compile_features(space_invaders PUBLIC cxx_std_17)
-target_compile_options(space_invaders PUBLIC -Wall -Wextra -Wpedantic -O2)
 
+if(MSVC)
+    find_package(OpenGL REQUIRED)
+    add_subdirectory(glm)
+    target_include_directories(space_invaders PUBLIC include_Windows_only/)
+    target_link_directories(space_invaders PUBLIC lib)
+    target_link_libraries(space_invaders PUBLIC
+        glm
+        glew32.lib
+        glfw3.lib
+        ${OPENGL_LIBRARIES}
+    )
+else()
+    target_link_libraries(space_invaders PUBLIC -lGL -lglfw -lGLEW)
+    target_compile_options(space_invaders PUBLIC -Wall -Wextra -Wpedantic -O2)
+endif()
 
 add_custom_target(run
     COMMAND ./space_invaders
