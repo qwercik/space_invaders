@@ -1,6 +1,6 @@
-#include <space_invaders/model/Cube.hpp>
+#include <space_invaders/model/predefined/Cube.hpp>
 
-namespace space_invaders::model {
+namespace space_invaders::model::predefined {
     Cube::Cube() {
         this->verticesNumber = 36;
 

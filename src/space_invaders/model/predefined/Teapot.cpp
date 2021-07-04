@@ -1,6 +1,6 @@
-#include <space_invaders/model/Teapot.hpp>
+#include <space_invaders/model/predefined/Teapot.hpp>
 
-namespace space_invaders::model {
+namespace space_invaders::model::predefined {
     Teapot::Teapot() {
         this->verticesNumber = 2976;
 

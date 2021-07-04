@@ -10,19 +10,19 @@
 #include <space_invaders/shader/ConstantShaderSet.hpp>
 #include <space_invaders/shader/LambertTexturedShaderSet.hpp>
 #include <space_invaders/model/TexturedModel.hpp>
-#include <space_invaders/model/Teapot.hpp>
-#include <space_invaders/model/Cube.hpp>
+#include <space_invaders/model/predefined/Teapot.hpp>
+#include <space_invaders/model/predefined/Cube.hpp>
 #include <space_invaders/model/HierarchicalModel.hpp>
 
 using space_invaders::window::Window;
 using space_invaders::shader::LambertTexturedShaderSet;
 using space_invaders::model::HierarchicalModel;
-using space_invaders::model::Cube;
-using space_invaders::model::Teapot;
+using space_invaders::model::predefined::Cube;
+using space_invaders::model::predefined::Teapot;
 using space_invaders::model::TexturedModel;
 
 int main() {
-    Window window("Space Invaders", 400, 400, true);
+    Window window("Space Invaders", 800, 800, true);
     LambertTexturedShaderSet shaders;
     // TexturedModel minicooper("../models/minicooper.obj", "../textures/bricks.png");
     TexturedModel minicooper(Teapot(), "../textures/bricks.png");
@@ -33,7 +33,7 @@ int main() {
     }
     
     auto viewMatrix = glm::lookAt(
-        glm::vec3(0.0f, 2.0f, -5.0f),
+        glm::vec3(0.0f, 2.0f, 5.0f),
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
@@ -47,7 +47,7 @@ int main() {
             glEnable(GL_DEPTH_TEST);
         })
         .onLoop([&]() {
-            HierarchicalModel(glm::rotate(glm::rotate(glm::mat4(1.0f), -3.14159f / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 3 * counter / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f)), [&](const HierarchicalModel& model) {
+            HierarchicalModel(glm::rotate(glm::rotate(glm::scale(glm::mat4(1.0f), glm::vec3(1.5f, 1.5f, 1.5f)), -3.14159f / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 3 * counter / 180.0f, glm::vec3(1.0f, 1.0f, 1.0f)), [&](const HierarchicalModel& model) {
                 shaders.use();
                 glUniform4f(shaders.uniform("color"), 0, 1, 0, 1);
                 glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(model.calculateEffectiveModelMatrix()));

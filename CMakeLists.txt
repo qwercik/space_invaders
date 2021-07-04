@@ -37,15 +37,15 @@ add_executable(space_invaders
     include/space_invaders/model/ColoredModel.hpp
     include/space_invaders/model/TexturedModel.hpp
     include/space_invaders/model/HierarchicalModel.hpp
-    include/space_invaders/model/Cube.hpp
-    include/space_invaders/model/Teapot.hpp
+    include/space_invaders/model/predefined/Cube.hpp
+    include/space_invaders/model/predefined/Teapot.hpp
     src/space_invaders/model/Model.cpp
     src/space_invaders/model/BasicModel.cpp
     src/space_invaders/model/ColoredModel.cpp
     src/space_invaders/model/TexturedModel.cpp
     src/space_invaders/model/HierarchicalModel.cpp
-    src/space_invaders/model/Cube.cpp
-    src/space_invaders/model/Teapot.cpp
+    src/space_invaders/model/predefined/Cube.cpp
+    src/space_invaders/model/predefined/Teapot.cpp
 
     # Texture management
     include/space_invaders/texture/Texture.hpp
