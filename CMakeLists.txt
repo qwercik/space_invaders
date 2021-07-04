@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.0.0)
 
 project(space_invaders)
 
+add_library(lodepng
+    include/lodepng/lodepng.hpp
+    src/lodepng/lodepng.cpp
+)
+target_include_directories(lodepng PUBLIC include/)
+
+
 add_executable(space_invaders
     # Main file of project
     src/space_invaders/main.cpp
@@ -42,7 +49,7 @@ add_executable(space_invaders
     include/obj_loader/obj_loader.h
 )
 target_include_directories(space_invaders PUBLIC include/)
-target_link_libraries(space_invaders PUBLIC -lGL -lglfw -lGLEW)
+target_link_libraries(space_invaders PUBLIC -lGL -lglfw -lGLEW lodepng)
 target_compile_features(space_invaders PUBLIC cxx_std_17)
 target_compile_options(space_invaders PUBLIC -Wall -Wextra -Wpedantic -O2)
 
