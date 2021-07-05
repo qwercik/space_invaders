@@ -9,6 +9,7 @@
 #include <space_invaders/window/Window.hpp>
 #include <space_invaders/shader/ConstantShaderSet.hpp>
 #include <space_invaders/shader/LambertTexturedShaderSet.hpp>
+#include <space_invaders/shader/TexturedShaderSet.hpp>
 #include <space_invaders/shader/CubeMapShaderSet.hpp>
 #include <space_invaders/texture/CubeMapTexture.hpp>
 #include <space_invaders/model/TexturedModel.hpp>
@@ -19,6 +20,7 @@
 
 using space_invaders::window::Window;
 using space_invaders::shader::LambertTexturedShaderSet;
+using space_invaders::shader::TexturedShaderSet;
 using space_invaders::shader::CubeMapShaderSet;
 using space_invaders::model::HierarchicalModel;
 using space_invaders::model::predefined::Cube;
@@ -38,7 +40,7 @@ int main() {
     Window window("Space Invaders", SCREEN_WIDTH, SCREEN_HEIGHT, true);
 
     Cube cube;
-    LambertTexturedShaderSet lambertShaders;
+    TexturedShaderSet lambertShaders;
     CubeMapShaderSet cubeMapShaders;
     CubeMapTexture cubeMapTexture({
         "../textures/skybox/right.png",
@@ -64,11 +66,11 @@ int main() {
     float fieldOfView = INITIAL_FIELD_OF_VIEW;
     auto viewMatrix = glm::lookAt(
         glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, -0.5f),
+        glm::vec3(0.0f, 0.0f, -1.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
     auto perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), SCREEN_RATIO, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
-    auto invaderModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2, 0.2f));
+    auto invaderModelMatrix = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2, 0.2f)), glm::vec3(0.0f, 0.0f, 2.0f));
 
     auto viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
     bool viewShouldRotate = false;
@@ -87,9 +89,9 @@ int main() {
             glDepthMask(GL_TRUE);
 
             lambertShaders.use();
-            glUniformMatrix4fv(cubeMapShaders.uniform("M"), 1, false, glm::value_ptr(invaderModelMatrix));
-            glUniformMatrix4fv(cubeMapShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
-            glUniformMatrix4fv(cubeMapShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            glUniformMatrix4fv(lambertShaders.uniform("M"), 1, false, glm::value_ptr(invaderModelMatrix));
+            glUniformMatrix4fv(lambertShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+            glUniformMatrix4fv(lambertShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
             invader.draw(lambertShaders);
 
             invaderModelMatrix = glm::rotate(invaderModelMatrix, glm::radians(5.0f), glm::vec3(1.0f, 1.0f, 1.0f));
@@ -152,7 +154,6 @@ int main() {
             }
         })
         ;
-
 
     return window.run();
 }
