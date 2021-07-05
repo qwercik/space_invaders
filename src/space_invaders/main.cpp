@@ -9,56 +9,151 @@
 #include <space_invaders/window/Window.hpp>
 #include <space_invaders/shader/ConstantShaderSet.hpp>
 #include <space_invaders/shader/LambertTexturedShaderSet.hpp>
+#include <space_invaders/shader/TexturedShaderSet.hpp>
+#include <space_invaders/shader/CubeMapShaderSet.hpp>
+#include <space_invaders/texture/CubeMapTexture.hpp>
 #include <space_invaders/model/TexturedModel.hpp>
-#include <space_invaders/model/Teapot.hpp>
-#include <space_invaders/model/Cube.hpp>
+#include <space_invaders/model/predefined/Teapot.hpp>
+#include <space_invaders/model/predefined/Cube.hpp>
+#include <space_invaders/model/predefined/Wall.hpp>
 #include <space_invaders/model/HierarchicalModel.hpp>
 
 using space_invaders::window::Window;
 using space_invaders::shader::LambertTexturedShaderSet;
+using space_invaders::shader::TexturedShaderSet;
+using space_invaders::shader::CubeMapShaderSet;
 using space_invaders::model::HierarchicalModel;
-using space_invaders::model::Cube;
-using space_invaders::model::Teapot;
+using space_invaders::model::predefined::Cube;
+using space_invaders::model::predefined::Teapot;
+using space_invaders::model::predefined::Wall;
 using space_invaders::model::TexturedModel;
+using space_invaders::texture::CubeMapTexture;
+
+const int SCREEN_WIDTH = 600;
+const int SCREEN_HEIGHT = 600;
+const float INITIAL_FIELD_OF_VIEW = 50.0f;
+const float SCREEN_RATIO = static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT);
+const float NEAR_CLIPPING_PANE = 0.1f;
+const float FAR_CLIPPING_PANE = 10.0f;
 
 int main() {
-    Window window("Space Invaders", 400, 400, true);
-    LambertTexturedShaderSet shaders;
-    // TexturedModel minicooper("../models/minicooper.obj", "../textures/bricks.png");
-    TexturedModel minicooper(Teapot(), "../textures/bricks.png");
+    Window window("Space Invaders", SCREEN_WIDTH, SCREEN_HEIGHT, true);
 
-    if (!minicooper) {
-        std::cerr << "Could not read obj file\n";
+    Cube cube;
+    TexturedShaderSet lambertShaders;
+    CubeMapShaderSet cubeMapShaders;
+    CubeMapTexture cubeMapTexture({
+        "../textures/skybox/right.png",
+        "../textures/skybox/left.png",
+        "../textures/skybox/top.png",
+        "../textures/skybox/bottom.png",
+        "../textures/skybox/front.png",
+        "../textures/skybox/back.png"
+    }); 
+
+    if (!cubeMapTexture) {
+        std::cerr << "Texture loading error\n";
         return 1;
     }
-    
+
+    TexturedModel invader("../models/invader_01.obj", "../textures/bricks.png");
+    if (!invader) {
+        std::cerr << "Could not read invader module\n";
+        return 1;
+    }
+
+
+    float fieldOfView = INITIAL_FIELD_OF_VIEW;
     auto viewMatrix = glm::lookAt(
-        glm::vec3(0.0f, 2.0f, -5.0f),
         glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, -1.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    auto perspectiveMatrix = glm::perspective(50.0f * 3.14159f / 180.0f, 1.0f, 1.0f, 10.f);
+    auto perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), SCREEN_RATIO, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
+    auto invaderModelMatrix = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2, 0.2f)), glm::vec3(0.0f, 0.0f, 2.0f));
 
-    int counter = 0;
+    auto viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
+    bool viewShouldRotate = false;
 
     window
         .onInit([]() {
-            glClearColor(1.f, 0.5f, 0.2f, 1.f);
+            glClearColor(0.1f, 0.1f, 0.1f, 1.f);
             glEnable(GL_DEPTH_TEST);
         })
         .onLoop([&]() {
-            HierarchicalModel(glm::rotate(glm::rotate(glm::mat4(1.0f), -3.14159f / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 3 * counter / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f)), [&](const HierarchicalModel& model) {
-                shaders.use();
-                glUniform4f(shaders.uniform("color"), 0, 1, 0, 1);
-                glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(model.calculateEffectiveModelMatrix()));
-                glUniformMatrix4fv(shaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
-                glUniformMatrix4fv(shaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
-                glUniform4f(shaders.uniform("color"), 0.0f, 1.0f, 0.0f, 1.0f);
-                minicooper.draw(shaders);
-            }).draw(shaders);
+            glDepthMask(GL_FALSE);
+            cubeMapShaders.use();
+            glUniformMatrix4fv(cubeMapShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+            glUniformMatrix4fv(cubeMapShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            cube.draw(cubeMapShaders);
+            glDepthMask(GL_TRUE);
 
-            counter++;
-        });
+            lambertShaders.use();
+            glUniformMatrix4fv(lambertShaders.uniform("M"), 1, false, glm::value_ptr(invaderModelMatrix));
+            glUniformMatrix4fv(lambertShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+            glUniformMatrix4fv(lambertShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            invader.draw(lambertShaders);
+
+            invaderModelMatrix = glm::rotate(invaderModelMatrix, glm::radians(5.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+
+            if (viewShouldRotate) {
+                viewMatrix = glm::rotate(viewMatrix, glm::radians(0.5f), viewRotationVector);
+            }
+        })
+        .onKey(GLFW_KEY_LEFT, GLFW_REPEAT, [&]() {
+            viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+        })
+        .onKey(GLFW_KEY_RIGHT, GLFW_REPEAT, [&]() {
+            viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        })
+        .onKey(GLFW_KEY_UP, GLFW_REPEAT, [&]() {
+            viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+        })
+        .onKey(GLFW_KEY_DOWN, GLFW_REPEAT, [&]() {
+            viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        })
+        .onKey(GLFW_KEY_Z, GLFW_REPEAT, [&]() {
+            fieldOfView += 1.0f;
+            perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), SCREEN_RATIO, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
+        })
+        .onKey(GLFW_KEY_X, GLFW_REPEAT, [&]() {
+            fieldOfView -= 1.0f;
+            perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), SCREEN_RATIO, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
+        })
+        .onMouseMove([&](double y, double x) {
+            viewShouldRotate = true;
+
+            if (x < SCREEN_WIDTH / 4) {
+                viewRotationVector = glm::vec3(0.0f, -1.0f, 0.0f);
+            } else if (x > 3 * SCREEN_WIDTH / 4) {
+                viewRotationVector = glm::vec3(0.0f, 1.0f, 0.0f);
+            } else {
+                viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
+                viewShouldRotate = false;
+            }
+        })
+        .onMouseLeave([]() {
+            std::cout << "Mouse has left window area\n";
+        })
+        .onMouseEnter([]() {
+            std::cout << "Mouse has came back to window area\n";
+        })
+        .onMouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, []() {
+            std::cout << "Left mouse button clicked\n";
+        })
+        .onMouseButton(GLFW_MOUSE_BUTTON_RIGHT, GLFW_PRESS, []() {
+            std::cout << "Right mouse button clicked\n";
+        })
+        .onScroll([&](double y, double x) {
+            if (y < 0) {
+                fieldOfView += 1.0f;
+                perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), SCREEN_RATIO, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
+            } else if (y > 0) {
+                fieldOfView -= 1.0f;
+                perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), SCREEN_RATIO, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
+            }
+        })
+        ;
 
     return window.run();
 }

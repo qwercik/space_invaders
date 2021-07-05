@@ -24,12 +24,14 @@ add_executable(space_invaders
     include/space_invaders/shader/LambertShaderSet.hpp
     include/space_invaders/shader/TexturedShaderSet.hpp
     include/space_invaders/shader/LambertTexturedShaderSet.hpp
+    include/space_invaders/shader/CubeMapShaderSet.hpp
     src/space_invaders/shader/Shader.cpp
     src/space_invaders/shader/ShaderSet.cpp
     src/space_invaders/shader/ConstantShaderSet.cpp
     src/space_invaders/shader/LambertShaderSet.cpp
     src/space_invaders/shader/TexturedShaderSet.cpp
     src/space_invaders/shader/LambertTexturedShaderSet.cpp
+    src/space_invaders/shader/CubeMapShaderSet.cpp
 
     # Models
     include/space_invaders/model/Model.hpp
@@ -37,23 +39,29 @@ add_executable(space_invaders
     include/space_invaders/model/ColoredModel.hpp
     include/space_invaders/model/TexturedModel.hpp
     include/space_invaders/model/HierarchicalModel.hpp
-    include/space_invaders/model/Cube.hpp
-    include/space_invaders/model/Teapot.hpp
+    include/space_invaders/model/predefined/Cube.hpp
+    include/space_invaders/model/predefined/Teapot.hpp
+    include/space_invaders/model/predefined/Wall.hpp
     src/space_invaders/model/Model.cpp
     src/space_invaders/model/BasicModel.cpp
     src/space_invaders/model/ColoredModel.cpp
     src/space_invaders/model/TexturedModel.cpp
     src/space_invaders/model/HierarchicalModel.cpp
-    src/space_invaders/model/Cube.cpp
-    src/space_invaders/model/Teapot.cpp
+    src/space_invaders/model/predefined/Cube.cpp
+    src/space_invaders/model/predefined/Teapot.cpp
+    src/space_invaders/model/predefined/Wall.cpp
 
     # Texture management
     include/space_invaders/texture/Texture.hpp
+    include/space_invaders/texture/CubeMapTexture.hpp
     src/space_invaders/texture/Texture.cpp
+    src/space_invaders/texture/CubeMapTexture.cpp
 
     # Window management and OpenGL initializing
     include/space_invaders/window/Window.hpp
+    include/space_invaders/window/Cursor.hpp
     src/space_invaders/window/Window.cpp
+    src/space_invaders/window/Cursor.cpp
 
     # Library for loading OBJ files
     include/obj_loader/obj_loader.h
@@ -67,6 +75,7 @@ if(MSVC)
     target_include_directories(space_invaders PUBLIC include_Windows_only/)
     target_link_directories(space_invaders PUBLIC lib)
     target_link_libraries(space_invaders PUBLIC
+        lodepng
         glm
         glew32.lib
         glfw3.lib
