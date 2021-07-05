@@ -24,12 +24,14 @@ add_executable(space_invaders
     include/space_invaders/shader/LambertShaderSet.hpp
     include/space_invaders/shader/TexturedShaderSet.hpp
     include/space_invaders/shader/LambertTexturedShaderSet.hpp
+    include/space_invaders/shader/CubeMapShaderSet.hpp
     src/space_invaders/shader/Shader.cpp
     src/space_invaders/shader/ShaderSet.cpp
     src/space_invaders/shader/ConstantShaderSet.cpp
     src/space_invaders/shader/LambertShaderSet.cpp
     src/space_invaders/shader/TexturedShaderSet.cpp
     src/space_invaders/shader/LambertTexturedShaderSet.cpp
+    src/space_invaders/shader/CubeMapShaderSet.cpp
 
     # Models
     include/space_invaders/model/Model.hpp
@@ -39,6 +41,7 @@ add_executable(space_invaders
     include/space_invaders/model/HierarchicalModel.hpp
     include/space_invaders/model/predefined/Cube.hpp
     include/space_invaders/model/predefined/Teapot.hpp
+    include/space_invaders/model/predefined/Wall.hpp
     src/space_invaders/model/Model.cpp
     src/space_invaders/model/BasicModel.cpp
     src/space_invaders/model/ColoredModel.cpp
@@ -46,10 +49,13 @@ add_executable(space_invaders
     src/space_invaders/model/HierarchicalModel.cpp
     src/space_invaders/model/predefined/Cube.cpp
     src/space_invaders/model/predefined/Teapot.cpp
+    src/space_invaders/model/predefined/Wall.cpp
 
     # Texture management
     include/space_invaders/texture/Texture.hpp
+    include/space_invaders/texture/CubeMapTexture.hpp
     src/space_invaders/texture/Texture.cpp
+    src/space_invaders/texture/CubeMapTexture.cpp
 
     # Window management and OpenGL initializing
     include/space_invaders/window/Window.hpp

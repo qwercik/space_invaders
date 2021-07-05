@@ -22,16 +22,16 @@ namespace space_invaders::texture {
     }
 
     bool Texture::initialize(const std::string& filename) {
+        glGenTextures(1, &this->handle);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, this->handle);
+
         unsigned width, height;
         std::vector<unsigned char> image;
         unsigned returnCode = lodepng::decode(image, width, height, filename);
         if (returnCode != 0) {
             return false;
         }
-
-        glGenTextures(1, &this->handle);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, this->handle);
 
         glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, reinterpret_cast<unsigned char*>(image.data()));
 

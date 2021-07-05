@@ -9,55 +9,74 @@
 #include <space_invaders/window/Window.hpp>
 #include <space_invaders/shader/ConstantShaderSet.hpp>
 #include <space_invaders/shader/LambertTexturedShaderSet.hpp>
+#include <space_invaders/shader/CubeMapShaderSet.hpp>
+#include <space_invaders/texture/CubeMapTexture.hpp>
 #include <space_invaders/model/TexturedModel.hpp>
 #include <space_invaders/model/predefined/Teapot.hpp>
 #include <space_invaders/model/predefined/Cube.hpp>
+#include <space_invaders/model/predefined/Wall.hpp>
 #include <space_invaders/model/HierarchicalModel.hpp>
 
 using space_invaders::window::Window;
 using space_invaders::shader::LambertTexturedShaderSet;
+using space_invaders::shader::CubeMapShaderSet;
 using space_invaders::model::HierarchicalModel;
 using space_invaders::model::predefined::Cube;
 using space_invaders::model::predefined::Teapot;
+using space_invaders::model::predefined::Wall;
 using space_invaders::model::TexturedModel;
+using space_invaders::texture::CubeMapTexture;
+
+const int SCREEN_WIDTH = 800;
+const int SCREEN_HEIGHT = 800;
+const float SCREEN_RATIO = static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT);
+
 
 int main() {
-    Window window("Space Invaders", 800, 800, true);
+    Window window("Space Invaders", SCREEN_WIDTH, SCREEN_HEIGHT, true);
     LambertTexturedShaderSet shaders;
-    // TexturedModel minicooper("../models/minicooper.obj", "../textures/bricks.png");
-    TexturedModel minicooper(Teapot(), "../textures/bricks.png");
+    CubeMapShaderSet cubeMapShaders;
 
-    if (!minicooper) {
-        std::cerr << "Could not read obj file\n";
+    CubeMapTexture cubeMapTexture({
+        "../textures/skybox/right.png",
+        "../textures/skybox/left.png",
+        "../textures/skybox/top.png",
+        "../textures/skybox/bottom.png",
+        "../textures/skybox/front.png",
+        "../textures/skybox/back.png"
+    }); 
+
+    if (!cubeMapTexture) {
+        std::cerr << "Texture loading error\n";
         return 1;
     }
-    
+
+    Cube cube;
+
+
     auto viewMatrix = glm::lookAt(
-        glm::vec3(0.0f, 2.0f, 5.0f),
+        glm::vec3(0.0f, 0.0f, 0.5f),
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    auto perspectiveMatrix = glm::perspective(50.0f * 3.14159f / 180.0f, 1.0f, 1.0f, 10.f);
-
-    int counter = 0;
+    auto perspectiveMatrix = glm::perspective(glm::radians(50.0f), SCREEN_RATIO, 0.1f, 10.0f);
+    auto modelMatrix = glm::mat4(1.0f);
 
     window
         .onInit([]() {
-            glClearColor(1.f, 0.5f, 0.2f, 1.f);
+            glClearColor(0.1f, 0.1f, 0.1f, 1.f);
             glEnable(GL_DEPTH_TEST);
         })
         .onLoop([&]() {
-            HierarchicalModel(glm::rotate(glm::rotate(glm::scale(glm::mat4(1.0f), glm::vec3(1.5f, 1.5f, 1.5f)), -3.14159f / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 3 * counter / 180.0f, glm::vec3(1.0f, 1.0f, 1.0f)), [&](const HierarchicalModel& model) {
-                shaders.use();
-                glUniform4f(shaders.uniform("color"), 0, 1, 0, 1);
-                glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(model.calculateEffectiveModelMatrix()));
-                glUniformMatrix4fv(shaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
-                glUniformMatrix4fv(shaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
-                glUniform4f(shaders.uniform("color"), 0.0f, 1.0f, 0.0f, 1.0f);
-                minicooper.draw(shaders);
-            }).draw(shaders);
+            glDepthMask(GL_FALSE);
+            cubeMapShaders.use();
+            glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(modelMatrix));
+            glUniformMatrix4fv(shaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+            glUniformMatrix4fv(shaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            cube.draw(cubeMapShaders);
+            glDepthMask(GL_TRUE);
 
-            counter++;
+            modelMatrix = glm::rotate(modelMatrix, 3 / 180.0f, glm::vec3(1.0f, 1.0f, 1.0f));
         });
 
     return window.run();
