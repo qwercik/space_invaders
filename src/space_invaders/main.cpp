@@ -75,9 +75,20 @@ int main() {
             glUniformMatrix4fv(shaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
             cube.draw(cubeMapShaders);
             glDepthMask(GL_TRUE);
-
-            modelMatrix = glm::rotate(modelMatrix, 3 / 180.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        })
+        .onKey(GLFW_KEY_LEFT, GLFW_REPEAT, [&]() {
+            modelMatrix = glm::rotate(modelMatrix, 1 / 180.0f, glm::vec3(0.0f, -1.0f, 0.0f));
+        })
+        .onKey(GLFW_KEY_RIGHT, GLFW_REPEAT, [&]() {
+            modelMatrix = glm::rotate(modelMatrix, 1 / 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        })
+        .onKey(GLFW_KEY_UP, GLFW_REPEAT, [&]() {
+            modelMatrix = glm::rotate(modelMatrix, 1 / 180.0f, glm::vec3(-1.0f, 0.0f, 0.0f));
+        })
+        .onKey(GLFW_KEY_DOWN, GLFW_REPEAT, [&]() {
+            modelMatrix = glm::rotate(modelMatrix, 1 / 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
         });
+
 
     return window.run();
 }

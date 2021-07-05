@@ -2,6 +2,7 @@
 
 #include <string>
 #include <functional>
+#include <list>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -14,10 +15,20 @@ namespace space_invaders::window {
         Window& onLoop(std::function<void()> loopCallback);
         Window& onExit(std::function<void()> exitCallback);
         
+        Window& onKey(int key, int action, std::function<void()> callback);
+        
         int run();
 
     private:
+        struct KeyEventHandler {
+            int key;
+            int action;
+            std::function<void()> callback;
+        };
+
         bool initialize(const std::string& title, unsigned width, unsigned height, bool resizable);
+        static void keyEventManager(GLFWwindow *window, int key, int scancode, int action, int mods);
+
 
         GLFWwindow *window;
         bool ok = true;
@@ -25,5 +36,7 @@ namespace space_invaders::window {
         std::function<void()> initCallback = []() {};
         std::function<void()> loopCallback = []() {};
         std::function<void()> exitCallback = []() {};
+
+        std::list<KeyEventHandler> keyEventHandlers;
     };
 }

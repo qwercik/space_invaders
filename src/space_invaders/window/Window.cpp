@@ -24,6 +24,16 @@ namespace space_invaders::window {
         this->exitCallback = exitCallback;
         return *this;
     }
+    
+    Window& Window::onKey(int key, int action, std::function<void()> callback) {
+        KeyEventHandler handler;
+        handler.key = key;
+        handler.action = action;
+        handler.callback = callback;
+
+        keyEventHandlers.push_back(handler);
+        return *this;
+    }
 
     int Window::run() {
         if (!this->ok) {
@@ -66,6 +76,10 @@ namespace space_invaders::window {
             glfwTerminate();
             return false;
         }
+       
+        glfwSetWindowUserPointer(this->window, this);
+        glfwSetKeyCallback(this->window, Window::keyEventManager);
+
 
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1);
@@ -81,5 +95,15 @@ namespace space_invaders::window {
         }
         
         return true;
+    }
+    
+    void Window::keyEventManager(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods) {
+        Window *window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+
+        for (const auto handler : window->keyEventHandlers) {
+            if (handler.key == key && handler.action == action) {
+                handler.callback();
+            }
+        }
     }
 }
