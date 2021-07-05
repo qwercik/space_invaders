@@ -34,12 +34,38 @@ namespace space_invaders::window {
         handler.action = action;
         handler.callback = callback;
 
-        keyEventHandlers.push_back(handler);
+        this->keyEventHandlers.push_back(handler);
+        return *this;
+    }
+    
+    Window& Window::onMouseButton(int button, int action, std::function<void()> callback) {
+        MouseButtonEventHandler handler;
+        handler.button = button;
+        handler.action = action;
+        handler.callback = callback;
+
+        this->mouseButtonEventHandlers.push_back(handler);
+        
         return *this;
     }
     
     Window& Window::onMouseMove(std::function<void(double y, double x)> callback) {
         this->mouseMoveCallback = callback;
+        return *this;
+    }
+
+    Window& Window::onMouseEnter(std::function<void()> callback) {
+        this->mouseEnterCallback = callback;
+        return *this;
+    }
+
+    Window& Window::onMouseLeave(std::function<void()> callback) {
+        this->mouseLeaveCallback = callback;
+        return *this;
+    }
+   
+    Window& Window::onScroll(std::function<void(double y, double x)> callback) {
+        this->mouseScrollCallback = callback;
         return *this;
     }
 
@@ -99,9 +125,12 @@ namespace space_invaders::window {
        
         glfwSetWindowUserPointer(this->window, this);
         glfwSetKeyCallback(this->window, Window::keyEventManager);
+        glfwSetMouseButtonCallback(this->window, Window::mouseButtonEventManager);
+        glfwSetScrollCallback(this->window, Window::scrollCallback);
 
         glfwSetCursor(this->window, this->cursor->getHandle());
         glfwSetCursorPosCallback(this->window, Window::cursorPositionCallback);
+        glfwSetCursorEnterCallback(this->window, Window::cursorEnterCallback);
 
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1);
@@ -130,12 +159,46 @@ namespace space_invaders::window {
             }
         }
     }
+    
+    void Window::mouseButtonEventManager(GLFWwindow *glfwWindow, int button, int action, int mods) {
+        Window *window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+
+        for (const auto handler : window->mouseButtonEventHandlers) {
+            if (handler.button == button && handler.action == action) {
+                if (handler.callback) {
+                    handler.callback();
+                }
+            }
+        }
+    }
 
     void Window::cursorPositionCallback(GLFWwindow *glfwWindow, double x, double y) {
         Window *window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
     
         if (window->mouseMoveCallback) {
             window->mouseMoveCallback(y, x);
+        }
+    }
+    
+    void Window::cursorEnterCallback(GLFWwindow *glfwWindow, int entered) {
+        Window *window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+       
+        if (entered) {
+            if (window->mouseEnterCallback) {
+                window->mouseEnterCallback();
+            }
+        } else {
+            if (window->mouseLeaveCallback) {
+                window->mouseLeaveCallback();
+            }
+        }
+    }
+
+    void Window::scrollCallback(GLFWwindow *glfwWindow, double x, double y) {
+        Window *window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+
+        if (window->mouseScrollCallback) {
+            window->mouseScrollCallback(y, x);
         }
     }
 }

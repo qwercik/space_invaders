@@ -121,13 +121,34 @@ int main() {
         .onMouseMove([&](double y, double x) {
             viewShouldRotate = true;
 
-            if (x < SCREEN_WIDTH / 3) {
+            if (x < SCREEN_WIDTH / 4) {
                 viewRotationVector = glm::vec3(0.0f, -1.0f, 0.0f);
-            } else if (x > 2 * SCREEN_WIDTH / 3) {
+            } else if (x > 3 * SCREEN_WIDTH / 4) {
                 viewRotationVector = glm::vec3(0.0f, 1.0f, 0.0f);
             } else {
                 viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
                 viewShouldRotate = false;
+            }
+        })
+        .onMouseLeave([]() {
+            std::cout << "Mouse has left window area\n";
+        })
+        .onMouseEnter([]() {
+            std::cout << "Mouse has came back to window area\n";
+        })
+        .onMouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, []() {
+            std::cout << "Left mouse button clicked\n";
+        })
+        .onMouseButton(GLFW_MOUSE_BUTTON_RIGHT, GLFW_PRESS, []() {
+            std::cout << "Right mouse button clicked\n";
+        })
+        .onScroll([&](double y, double x) {
+            if (y < 0) {
+                fieldOfView += 1.0f;
+                perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), SCREEN_RATIO, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
+            } else if (y > 0) {
+                fieldOfView -= 1.0f;
+                perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), SCREEN_RATIO, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
             }
         })
         ;
