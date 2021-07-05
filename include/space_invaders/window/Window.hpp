@@ -3,8 +3,10 @@
 #include <string>
 #include <functional>
 #include <list>
+#include <memory>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <space_invaders/window/Cursor.hpp>
 
 namespace space_invaders::window {
     class Window {
@@ -21,6 +23,8 @@ namespace space_invaders::window {
         int run();
 
     private:
+        const std::string CURSOR_FILE_PATH = "../textures/cursor.png";
+        
         struct KeyEventHandler {
             int key;
             int action;
@@ -33,6 +37,7 @@ namespace space_invaders::window {
 
 
         GLFWwindow *window;
+        std::unique_ptr<Cursor> cursor;
         bool ok = true;
 
         std::function<void()> initCallback;

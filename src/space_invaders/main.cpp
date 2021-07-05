@@ -27,8 +27,8 @@ using space_invaders::model::predefined::Wall;
 using space_invaders::model::TexturedModel;
 using space_invaders::texture::CubeMapTexture;
 
-const int SCREEN_WIDTH = 1000;
-const int SCREEN_HEIGHT = 1000;
+const int SCREEN_WIDTH = 600;
+const int SCREEN_HEIGHT = 600;
 const float INITIAL_FIELD_OF_VIEW = 50.0f;
 const float SCREEN_RATIO = static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT);
 const float NEAR_CLIPPING_PANE = 0.1f;

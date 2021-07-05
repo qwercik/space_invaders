@@ -1,12 +1,15 @@
 #include <space_invaders/window/Window.hpp>
+#include <space_invaders/window/Cursor.hpp>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <cstdio>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 namespace space_invaders::window {
-    Window::Window(const std::string& title, unsigned width, unsigned height, bool resizable) {
+    Window::Window(const std::string& title, unsigned width, unsigned height, bool resizable)
+    {
         this->ok = this->initialize(title, width, height, resizable);
     }
 
@@ -87,12 +90,17 @@ namespace space_invaders::window {
             glfwTerminate();
             return false;
         }
+
+        this->cursor = std::make_unique<Cursor>(Window::CURSOR_FILE_PATH);
+        if (!*this->cursor) {
+            std::cout << "Could not read cursor file\n";
+            return false;
+        }
        
         glfwSetWindowUserPointer(this->window, this);
         glfwSetKeyCallback(this->window, Window::keyEventManager);
 
-        // TODO: hide cursor and create a custom one
-        // glfwSetInputMode(this->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        glfwSetCursor(this->window, this->cursor->getHandle());
         glfwSetCursorPosCallback(this->window, Window::cursorPositionCallback);
 
         glfwMakeContextCurrent(window);

@@ -59,7 +59,9 @@ add_executable(space_invaders
 
     # Window management and OpenGL initializing
     include/space_invaders/window/Window.hpp
+    include/space_invaders/window/Cursor.hpp
     src/space_invaders/window/Window.cpp
+    src/space_invaders/window/Cursor.cpp
 
     # Library for loading OBJ files
     include/obj_loader/obj_loader.h
