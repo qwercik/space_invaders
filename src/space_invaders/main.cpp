@@ -27,8 +27,8 @@ using space_invaders::model::predefined::Wall;
 using space_invaders::model::TexturedModel;
 using space_invaders::texture::CubeMapTexture;
 
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 800;
+const int SCREEN_WIDTH = 600;
+const int SCREEN_HEIGHT = 600;
 const float INITIAL_FIELD_OF_VIEW = 50.0f;
 const float SCREEN_RATIO = static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT);
 const float NEAR_CLIPPING_PANE = 0.1f;
@@ -62,14 +62,12 @@ int main() {
 
 
     float fieldOfView = INITIAL_FIELD_OF_VIEW;
-
     auto viewMatrix = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 0.5f),
         glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, -0.5f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
     auto perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), SCREEN_RATIO, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
-    auto skyboxModelMatrix = glm::mat4(1.0f);
 
     auto invaderModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2, 0.2f));
 
@@ -81,7 +79,6 @@ int main() {
         .onLoop([&]() {
             glDepthMask(GL_FALSE);
             cubeMapShaders.use();
-            glUniformMatrix4fv(cubeMapShaders.uniform("M"), 1, false, glm::value_ptr(skyboxModelMatrix));
             glUniformMatrix4fv(cubeMapShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
             glUniformMatrix4fv(cubeMapShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
             cube.draw(cubeMapShaders);
@@ -96,16 +93,16 @@ int main() {
             invaderModelMatrix = glm::rotate(invaderModelMatrix, glm::radians(5.0f), glm::vec3(1.0f, 1.0f, 1.0f));
         })
         .onKey(GLFW_KEY_LEFT, GLFW_REPEAT, [&]() {
-            skyboxModelMatrix = glm::rotate(skyboxModelMatrix, glm::radians(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+            viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
         })
         .onKey(GLFW_KEY_RIGHT, GLFW_REPEAT, [&]() {
-            skyboxModelMatrix = glm::rotate(skyboxModelMatrix, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         })
         .onKey(GLFW_KEY_UP, GLFW_REPEAT, [&]() {
-            skyboxModelMatrix = glm::rotate(skyboxModelMatrix, glm::radians(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+            viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
         })
         .onKey(GLFW_KEY_DOWN, GLFW_REPEAT, [&]() {
-            skyboxModelMatrix = glm::rotate(skyboxModelMatrix, glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         })
         .onKey(GLFW_KEY_Z, GLFW_REPEAT, [&]() {
             fieldOfView += 1.0f;
