@@ -29,14 +29,17 @@ using space_invaders::texture::CubeMapTexture;
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
+const float INITIAL_FIELD_OF_VIEW = 50.0f;
 const float SCREEN_RATIO = static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT);
-
+const float NEAR_CLIPPING_PANE = 0.1f;
+const float FAR_CLIPPING_PANE = 10.0f;
 
 int main() {
     Window window("Space Invaders", SCREEN_WIDTH, SCREEN_HEIGHT, true);
+
+    Cube cube;
     LambertTexturedShaderSet shaders;
     CubeMapShaderSet cubeMapShaders;
-
     CubeMapTexture cubeMapTexture({
         "../textures/skybox/right.png",
         "../textures/skybox/left.png",
@@ -51,15 +54,15 @@ int main() {
         return 1;
     }
 
-    Cube cube;
 
+    float fieldOfView = INITIAL_FIELD_OF_VIEW;
 
     auto viewMatrix = glm::lookAt(
         glm::vec3(0.0f, 0.0f, 0.5f),
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    auto perspectiveMatrix = glm::perspective(glm::radians(50.0f), SCREEN_RATIO, 0.1f, 10.0f);
+    auto perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), SCREEN_RATIO, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
     auto modelMatrix = glm::mat4(1.0f);
 
     window
@@ -68,6 +71,8 @@ int main() {
             glEnable(GL_DEPTH_TEST);
         })
         .onLoop([&]() {
+
+
             glDepthMask(GL_FALSE);
             cubeMapShaders.use();
             glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(modelMatrix));
@@ -77,16 +82,24 @@ int main() {
             glDepthMask(GL_TRUE);
         })
         .onKey(GLFW_KEY_LEFT, GLFW_REPEAT, [&]() {
-            modelMatrix = glm::rotate(modelMatrix, 1 / 180.0f, glm::vec3(0.0f, -1.0f, 0.0f));
+            modelMatrix = glm::rotate(modelMatrix, glm::radians(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
         })
         .onKey(GLFW_KEY_RIGHT, GLFW_REPEAT, [&]() {
-            modelMatrix = glm::rotate(modelMatrix, 1 / 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+            modelMatrix = glm::rotate(modelMatrix, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         })
         .onKey(GLFW_KEY_UP, GLFW_REPEAT, [&]() {
-            modelMatrix = glm::rotate(modelMatrix, 1 / 180.0f, glm::vec3(-1.0f, 0.0f, 0.0f));
+            modelMatrix = glm::rotate(modelMatrix, glm::radians(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
         })
         .onKey(GLFW_KEY_DOWN, GLFW_REPEAT, [&]() {
-            modelMatrix = glm::rotate(modelMatrix, 1 / 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+            modelMatrix = glm::rotate(modelMatrix, glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        })
+        .onKey(GLFW_KEY_Z, GLFW_REPEAT, [&]() {
+            fieldOfView += 1.0f;
+            perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), SCREEN_RATIO, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
+        })
+        .onKey(GLFW_KEY_X, GLFW_REPEAT, [&]() {
+            fieldOfView -= 1.0f;
+            perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), SCREEN_RATIO, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
         });
 
 
