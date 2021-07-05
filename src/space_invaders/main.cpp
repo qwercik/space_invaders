@@ -38,7 +38,7 @@ int main() {
     Window window("Space Invaders", SCREEN_WIDTH, SCREEN_HEIGHT, true);
 
     Cube cube;
-    LambertTexturedShaderSet shaders;
+    LambertTexturedShaderSet lambertShaders;
     CubeMapShaderSet cubeMapShaders;
     CubeMapTexture cubeMapTexture({
         "../textures/skybox/right.png",
@@ -54,6 +54,12 @@ int main() {
         return 1;
     }
 
+    TexturedModel invader("../models/invader_01.obj", "../textures/bricks.png");
+    if (!invader) {
+        std::cerr << "Could not read invader module\n";
+        return 1;
+    }
+
 
     float fieldOfView = INITIAL_FIELD_OF_VIEW;
 
@@ -63,7 +69,9 @@ int main() {
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
     auto perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), SCREEN_RATIO, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
-    auto modelMatrix = glm::mat4(1.0f);
+    auto skyboxModelMatrix = glm::mat4(1.0f);
+
+    auto invaderModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2, 0.2f));
 
     window
         .onInit([]() {
@@ -71,27 +79,33 @@ int main() {
             glEnable(GL_DEPTH_TEST);
         })
         .onLoop([&]() {
-
-
             glDepthMask(GL_FALSE);
             cubeMapShaders.use();
-            glUniformMatrix4fv(shaders.uniform("M"), 1, false, glm::value_ptr(modelMatrix));
-            glUniformMatrix4fv(shaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
-            glUniformMatrix4fv(shaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            glUniformMatrix4fv(cubeMapShaders.uniform("M"), 1, false, glm::value_ptr(skyboxModelMatrix));
+            glUniformMatrix4fv(cubeMapShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+            glUniformMatrix4fv(cubeMapShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
             cube.draw(cubeMapShaders);
             glDepthMask(GL_TRUE);
+
+            lambertShaders.use();
+            glUniformMatrix4fv(cubeMapShaders.uniform("M"), 1, false, glm::value_ptr(invaderModelMatrix));
+            glUniformMatrix4fv(cubeMapShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+            glUniformMatrix4fv(cubeMapShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            invader.draw(lambertShaders);
+
+            invaderModelMatrix = glm::rotate(invaderModelMatrix, glm::radians(5.0f), glm::vec3(1.0f, 1.0f, 1.0f));
         })
         .onKey(GLFW_KEY_LEFT, GLFW_REPEAT, [&]() {
-            modelMatrix = glm::rotate(modelMatrix, glm::radians(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+            skyboxModelMatrix = glm::rotate(skyboxModelMatrix, glm::radians(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
         })
         .onKey(GLFW_KEY_RIGHT, GLFW_REPEAT, [&]() {
-            modelMatrix = glm::rotate(modelMatrix, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            skyboxModelMatrix = glm::rotate(skyboxModelMatrix, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         })
         .onKey(GLFW_KEY_UP, GLFW_REPEAT, [&]() {
-            modelMatrix = glm::rotate(modelMatrix, glm::radians(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+            skyboxModelMatrix = glm::rotate(skyboxModelMatrix, glm::radians(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
         })
         .onKey(GLFW_KEY_DOWN, GLFW_REPEAT, [&]() {
-            modelMatrix = glm::rotate(modelMatrix, glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            skyboxModelMatrix = glm::rotate(skyboxModelMatrix, glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         })
         .onKey(GLFW_KEY_Z, GLFW_REPEAT, [&]() {
             fieldOfView += 1.0f;
