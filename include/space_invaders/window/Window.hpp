@@ -16,6 +16,7 @@ namespace space_invaders::window {
         Window& onExit(std::function<void()> exitCallback);
         
         Window& onKey(int key, int action, std::function<void()> callback);
+        Window& onMouseMove(std::function<void(double y, double x)> callback);
         
         int run();
 
@@ -28,15 +29,18 @@ namespace space_invaders::window {
 
         bool initialize(const std::string& title, unsigned width, unsigned height, bool resizable);
         static void keyEventManager(GLFWwindow *window, int key, int scancode, int action, int mods);
+        static void cursorPositionCallback(GLFWwindow *window, double x, double y);
 
 
         GLFWwindow *window;
         bool ok = true;
 
-        std::function<void()> initCallback = []() {};
-        std::function<void()> loopCallback = []() {};
-        std::function<void()> exitCallback = []() {};
+        std::function<void()> initCallback;
+        std::function<void()> loopCallback;
+        std::function<void()> exitCallback;
 
         std::list<KeyEventHandler> keyEventHandlers;
+        
+        std::function<void(double y, double x)> mouseMoveCallback;
     };
 }

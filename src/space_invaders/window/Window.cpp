@@ -34,24 +34,35 @@ namespace space_invaders::window {
         keyEventHandlers.push_back(handler);
         return *this;
     }
+    
+    Window& Window::onMouseMove(std::function<void(double y, double x)> callback) {
+        this->mouseMoveCallback = callback;
+        return *this;
+    }
 
     int Window::run() {
         if (!this->ok) {
             return EXIT_FAILURE;
         }
 
-        this->initCallback();
+        if (this->initCallback) {
+            this->initCallback();
+        }
 
         while (!glfwWindowShouldClose(window)) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            this->loopCallback(); 
+            if (this->loopCallback) {
+                this->loopCallback(); 
+            }
 
             glfwSwapBuffers(this->window);
             glfwPollEvents();
         }
-
-        this->exitCallback();
+        
+        if (this->exitCallback) {
+            this->exitCallback();
+        }
 
         glfwDestroyWindow(this->window);
         glfwTerminate();
@@ -80,6 +91,9 @@ namespace space_invaders::window {
         glfwSetWindowUserPointer(this->window, this);
         glfwSetKeyCallback(this->window, Window::keyEventManager);
 
+        // TODO: hide cursor and create a custom one
+        // glfwSetInputMode(this->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        glfwSetCursorPosCallback(this->window, Window::cursorPositionCallback);
 
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1);
@@ -102,8 +116,18 @@ namespace space_invaders::window {
 
         for (const auto handler : window->keyEventHandlers) {
             if (handler.key == key && handler.action == action) {
-                handler.callback();
+                if (handler.callback) {
+                    handler.callback();
+                }
             }
+        }
+    }
+
+    void Window::cursorPositionCallback(GLFWwindow *glfwWindow, double x, double y) {
+        Window *window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+    
+        if (window->mouseMoveCallback) {
+            window->mouseMoveCallback(y, x);
         }
     }
 }
