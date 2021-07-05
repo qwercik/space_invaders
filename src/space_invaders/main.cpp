@@ -9,6 +9,7 @@
 #include <space_invaders/window/Window.hpp>
 #include <space_invaders/shader/ConstantShaderSet.hpp>
 #include <space_invaders/shader/LambertTexturedShaderSet.hpp>
+#include <space_invaders/shader/PhongShaderSet.hpp>
 #include <space_invaders/shader/TexturedShaderSet.hpp>
 #include <space_invaders/shader/CubeMapShaderSet.hpp>
 #include <space_invaders/texture/CubeMapTexture.hpp>
@@ -21,6 +22,7 @@
 using space_invaders::window::Window;
 using space_invaders::shader::LambertTexturedShaderSet;
 using space_invaders::shader::TexturedShaderSet;
+using space_invaders::shader::PhongShaderSet;
 using space_invaders::shader::CubeMapShaderSet;
 using space_invaders::model::HierarchicalModel;
 using space_invaders::model::predefined::Cube;
@@ -40,7 +42,8 @@ int main() {
     Window window("Space Invaders", SCREEN_WIDTH, SCREEN_HEIGHT, true);
 
     Cube cube;
-    TexturedShaderSet lambertShaders;
+    LambertTexturedShaderSet lambertShaders;
+    PhongShaderSet phongShaders;
     CubeMapShaderSet cubeMapShaders;
     CubeMapTexture cubeMapTexture({
         "../textures/skybox/right.png",
@@ -76,6 +79,7 @@ int main() {
     TexturedModel invader1("../models/invader_01.obj", "../textures/alien_1.png");
     TexturedModel invader2("../models/invader_02.obj", "../textures/alien_2.png");
     TexturedModel invader3("../models/invader_03.obj", "../textures/alien_3.png");
+    TexturedModel teapot(Teapot(), "../textures/spaceship.png");
 
     window
         .onInit([]() {
@@ -90,11 +94,13 @@ int main() {
             cube.draw(cubeMapShaders);
             glDepthMask(GL_TRUE);
 
-            lambertShaders.use();
-            glUniformMatrix4fv(lambertShaders.uniform("M"), 1, false, glm::value_ptr(modelMatrix));
-            glUniformMatrix4fv(lambertShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
-            glUniformMatrix4fv(lambertShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
-            mainShip.draw(lambertShaders);
+            phongShaders.use();
+            glUniformMatrix4fv(phongShaders.uniform("M"), 1, false, glm::value_ptr(modelMatrix));
+            glUniformMatrix4fv(phongShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+            glUniformMatrix4fv(phongShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            mainShip.draw(phongShaders);
+
+            modelMatrix = glm::rotate(modelMatrix, glm::radians(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
             if (viewShouldRotate) {
                 viewMatrix = glm::rotate(viewMatrix, glm::radians(0.5f), viewRotationVector);
