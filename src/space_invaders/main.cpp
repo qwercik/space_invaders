@@ -33,8 +33,8 @@ const int SCREEN_WIDTH = 600;
 const int SCREEN_HEIGHT = 600;
 const float INITIAL_FIELD_OF_VIEW = 50.0f;
 const float SCREEN_RATIO = static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT);
-const float NEAR_CLIPPING_PANE = 0.1f;
-const float FAR_CLIPPING_PANE = 10.0f;
+const float NEAR_CLIPPING_PANE = 0.02f;
+const float FAR_CLIPPING_PANE = 20.0f;
 
 int main() {
     Window window("Space Invaders", SCREEN_WIDTH, SCREEN_HEIGHT, true);
@@ -56,24 +56,26 @@ int main() {
         return 1;
     }
 
-    TexturedModel invader("../models/invader_01.obj", "../textures/bricks.png");
-    if (!invader) {
-        std::cerr << "Could not read invader module\n";
-        return 1;
-    }
 
 
     float fieldOfView = INITIAL_FIELD_OF_VIEW;
     auto viewMatrix = glm::lookAt(
         glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, -1.0f),
+        glm::vec3(0.0f, 0.0f, 1.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
     auto perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), SCREEN_RATIO, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
-    auto invaderModelMatrix = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2, 0.2f)), glm::vec3(0.0f, 0.0f, 2.0f));
+    auto modelMatrix = glm::rotate(glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2, 0.2f)), glm::vec3(0.0f, 0.0f, 2.0f)), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
     auto viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
     bool viewShouldRotate = false;
+    
+    // I don't check whether textured model was read correctly intentionally
+    TexturedModel mainShip("../models/main_ship.obj", "../textures/spaceship.png");
+    TexturedModel ufo("../models/ufo.obj", "../textures/spaceship.png");
+    TexturedModel invader1("../models/invader_01.obj", "../textures/alien_1.png");
+    TexturedModel invader2("../models/invader_02.obj", "../textures/alien_2.png");
+    TexturedModel invader3("../models/invader_03.obj", "../textures/alien_3.png");
 
     window
         .onInit([]() {
@@ -89,12 +91,10 @@ int main() {
             glDepthMask(GL_TRUE);
 
             lambertShaders.use();
-            glUniformMatrix4fv(lambertShaders.uniform("M"), 1, false, glm::value_ptr(invaderModelMatrix));
+            glUniformMatrix4fv(lambertShaders.uniform("M"), 1, false, glm::value_ptr(modelMatrix));
             glUniformMatrix4fv(lambertShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
             glUniformMatrix4fv(lambertShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
-            invader.draw(lambertShaders);
-
-            invaderModelMatrix = glm::rotate(invaderModelMatrix, glm::radians(5.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+            mainShip.draw(lambertShaders);
 
             if (viewShouldRotate) {
                 viewMatrix = glm::rotate(viewMatrix, glm::radians(0.5f), viewRotationVector);
