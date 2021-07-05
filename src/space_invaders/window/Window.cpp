@@ -8,9 +8,9 @@
 #include <GLFW/glfw3.h>
 
 namespace space_invaders::window {
-    Window::Window(const std::string& title, unsigned width, unsigned height, bool resizable)
+    Window::Window(const std::string& title, unsigned *width, unsigned *height, bool resizable, bool fullscreen)
     {
-        this->ok = this->initialize(title, width, height, resizable);
+        this->ok = this->initialize(title, width, height, resizable, fullscreen);
     }
 
     Window& Window::onInit(std::function<void()> initCallback) {
@@ -99,10 +99,16 @@ namespace space_invaders::window {
         return EXIT_SUCCESS;
     }
     
-    bool Window::initialize(const std::string& title, unsigned width, unsigned height, bool resizable) {
+    bool Window::initialize(const std::string& title, unsigned *width, unsigned *height, bool resizable, bool fullscreen) {
         if (!glfwInit()) {
             std::cerr << "Could not initialize GLFW\n";
             return false;
+        }
+
+        if (fullscreen) {
+            const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            *width = mode->width <= mode->height ? mode->width : mode->height;
+            *height = *width;
         }
 
         glfwWindowHint(GLFW_RESIZABLE, resizable);
@@ -110,7 +116,7 @@ namespace space_invaders::window {
             std::cerr << "[Error " << error << "]: " << desc << '\n';
         });
 
-        this->window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+        this->window = glfwCreateWindow(static_cast<int>(*width), static_cast<int>(*height), title.c_str(), NULL, NULL);
         if (!this->window) {
             std::cerr << "Could not initialize window\n";
             glfwTerminate();
