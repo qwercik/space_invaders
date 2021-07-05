@@ -117,7 +117,7 @@ namespace space_invaders::window {
             return false;
         }
 
-        this->cursor = std::make_unique<Cursor>(Window::CURSOR_FILE_PATH);
+        this->cursor = std::make_unique<Cursor>(Window::CURSOR_FILE_PATH, Cursor::Hotspot::CENTER);
         if (!*this->cursor) {
             std::cout << "Could not read cursor file\n";
             return false;

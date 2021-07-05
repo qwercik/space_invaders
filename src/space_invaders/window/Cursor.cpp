@@ -4,8 +4,8 @@
 #include <iostream>
 
 namespace space_invaders::window {
-    Cursor::Cursor(const std::string& filename) {
-        this->ok = this->initialize(filename);
+    Cursor::Cursor(const std::string& filename, Cursor::Hotspot hotspot) {
+        this->ok = this->initialize(filename, hotspot);
     }
 
     Cursor::~Cursor() {
@@ -22,7 +22,7 @@ namespace space_invaders::window {
         return this->cursor;
     }
     
-    bool Cursor::initialize(const std::string& filename) {
+    bool Cursor::initialize(const std::string& filename, Cursor::Hotspot hotspot) {
         unsigned width, height;
 
         unsigned returnCode = lodepng::decode(imageData, width, height, filename);
@@ -34,7 +34,9 @@ namespace space_invaders::window {
         this->image.width = width;
         this->image.height = height;
         this->image.pixels = imageData.data();
-        this->cursor = glfwCreateCursor(&this->image, 0, 0);
+        int hotspotX = hotspot == Hotspot::CENTER ? width / 2 : 0;
+        int hotspotY = hotspot == Hotspot::CENTER ? height / 2 : 0;
+        this->cursor = glfwCreateCursor(&this->image, hotspotX, hotspotY);
 
         return this->cursor != nullptr;
     }

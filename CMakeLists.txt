@@ -75,6 +75,7 @@ if(MSVC)
     target_include_directories(space_invaders PUBLIC include_Windows_only/)
     target_link_directories(space_invaders PUBLIC lib)
     target_link_libraries(space_invaders PUBLIC
+        lodepng
         glm
         glew32.lib
         glfw3.lib
