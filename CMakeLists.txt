@@ -63,6 +63,14 @@ add_executable(space_invaders
     src/space_invaders/window/Window.cpp
     src/space_invaders/window/Cursor.cpp
 
+    # Gameplay related features
+    include/space_invaders/game/Invader.hpp
+        include/space_invaders/game/Wave.hpp
+    include/space_invaders/game/Squadron.hpp
+    src/space_invaders/game/Invader.cpp
+        src/space_invaders/game/Wave.cpp
+    src/space_invaders/game/Squadron.cpp
+
     # Library for loading OBJ files
     include/obj_loader/obj_loader.h
 )

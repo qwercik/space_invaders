@@ -70,6 +70,7 @@ namespace space_invaders::window {
     }
 
     int Window::run() {
+        glfwSetTime(0.0f);
         if (!this->ok) {
             return EXIT_FAILURE;
         }

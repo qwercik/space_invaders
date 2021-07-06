@@ -17,6 +17,8 @@
 #include <space_invaders/model/predefined/Cube.hpp>
 #include <space_invaders/model/predefined/Wall.hpp>
 #include <space_invaders/model/HierarchicalModel.hpp>
+#include <space_invaders/game/Invader.hpp>
+#include <space_invaders/game/Squadron.hpp>
 
 using space_invaders::window::Window;
 using space_invaders::shader::LambertTexturedShaderSet;
@@ -28,16 +30,31 @@ using space_invaders::model::predefined::Teapot;
 using space_invaders::model::predefined::Wall;
 using space_invaders::model::TexturedModel;
 using space_invaders::texture::CubeMapTexture;
+using space_invaders::game::Squadron;
+using space_invaders::game::Invader;
 
 const float INITIAL_FIELD_OF_VIEW = 50.0f;
 const float NEAR_CLIPPING_PANE = 0.1f;
 const float FAR_CLIPPING_PANE = 10.0f;
 
+const int NUMBER_OF_ROWS = 6;
+const int INVADERS_PER_ROW = 10;
+const int MARGIN = 2;
+const bool UFO = true;
+const float DISTANCE_FROM_CENTER = -7.0f;
+const float SHIP_SIZE_MULTIPLIER = 0.5f;
+const float SHIP_GAP_MULTIPLIER = 1.0f;
+const float TRANSLATE_VALUE = SHIP_SIZE_MULTIPLIER * SHIP_GAP_MULTIPLIER;
+const float INITIAL_WAVE_HEIGHT = 5.0f;
+const float SPEED = 0.3f;
+
 int main() {
-    unsigned screen_width = 600;
-    unsigned screen_height = 600;
-    Window window("Space Invaders", &screen_height, &screen_width, false, true);
-    const float screen_ratio = static_cast<float>(screen_width) / static_cast<float>(screen_height);
+    Squadron squadron(NUMBER_OF_ROWS, INVADERS_PER_ROW, UFO, MARGIN, INITIAL_WAVE_HEIGHT, SPEED);
+
+    unsigned screenWidth = 600;
+    unsigned screenHeight = 600;
+    Window window("Space Invaders", &screenHeight, &screenWidth, false, true);
+    const float screenRatio = static_cast<float>(screenWidth) / static_cast<float>(screenHeight);
 
 
     Cube cube;
@@ -57,24 +74,31 @@ int main() {
         return 1;
     }
 
-    TexturedModel invader("../models/invader_01.obj", "../textures/bricks.png");
-    if (!invader) {
-        std::cerr << "Could not read invader module\n";
-        return 1;
-    }
-
+    TexturedModel invader_01("../models/invader_01.obj", "../textures/bricks.png");
+    TexturedModel invader_02("../models/invader_02.obj", "../textures/bricks.png");
+    TexturedModel invader_03("../models/invader_03.obj", "../textures/bricks.png");
+    TexturedModel ufo("../models/ufo.obj", "../textures/bricks.png");
 
     float fieldOfView = INITIAL_FIELD_OF_VIEW;
     auto viewMatrix = glm::lookAt(
         glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, -1.0f),
+        glm::vec3(0.0f, 0.0f, -7.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    auto perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screen_ratio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
-    auto invaderModelMatrix = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2, 0.2f)), glm::vec3(0.0f, 0.0f, 2.0f));
+    auto perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screenRatio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
+
+    glm::mat4 invaderModelMatrix = glm::mat4(1.0f);
+    invaderModelMatrix = glm::translate(invaderModelMatrix, glm::vec3(
+        -0.5f * (INVADERS_PER_ROW - 1 + 2 * MARGIN) * SHIP_SIZE_MULTIPLIER * SHIP_GAP_MULTIPLIER,
+        0.0f,
+        DISTANCE_FROM_CENTER
+    ));
+    invaderModelMatrix = glm::rotate(invaderModelMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    invaderModelMatrix = glm::scale(invaderModelMatrix, glm::vec3(SHIP_SIZE_MULTIPLIER));
 
     auto viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
     bool viewShouldRotate = false;
+    float time;
 
     window
         .onInit([]() {
@@ -82,6 +106,8 @@ int main() {
             glEnable(GL_DEPTH_TEST);
         })
         .onLoop([&]() {
+            time = static_cast<float>(glfwGetTime());
+            glfwSetTime(0.0f);
             glDepthMask(GL_FALSE);
             cubeMapShaders.use();
             glUniformMatrix4fv(cubeMapShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
@@ -90,16 +116,37 @@ int main() {
             glDepthMask(GL_TRUE);
 
             lambertShaders.use();
-            glUniformMatrix4fv(lambertShaders.uniform("M"), 1, false, glm::value_ptr(invaderModelMatrix));
             glUniformMatrix4fv(lambertShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
             glUniformMatrix4fv(lambertShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
-            invader.draw(lambertShaders);
+            do {
+                glUniformMatrix4fv(lambertShaders.uniform("M"), 1, false, glm::value_ptr(
+                    glm::translate(
+                        glm::mat4(1.0f),
+                        glm::vec3(TRANSLATE_VALUE * squadron.getX(), TRANSLATE_VALUE * squadron.getY(), 0.0f)
+                    ) * invaderModelMatrix
+                ));
 
-            invaderModelMatrix = glm::rotate(invaderModelMatrix, glm::radians(5.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+                switch (squadron.getType()) {
+                    case 0:
+                        invader_01.draw(lambertShaders);
+                        break;
+                    case 1:
+                        invader_02.draw(lambertShaders);
+                        break;
+                    case 2:
+                        invader_03.draw(lambertShaders);
+                        break;
+                    case 3:
+                        ufo.draw(lambertShaders);
+                        break;
+                }
+            } while(squadron.nextInvader());
 
             if (viewShouldRotate) {
                 viewMatrix = glm::rotate(viewMatrix, glm::radians(0.5f), viewRotationVector);
             }
+            squadron.resetInvader();
+            squadron.moveShips(time);
         })
         .onKey(GLFW_KEY_LEFT, GLFW_REPEAT, [&]() {
             viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
@@ -115,18 +162,18 @@ int main() {
         })
         .onKey(GLFW_KEY_Z, GLFW_REPEAT, [&]() {
             fieldOfView += 1.0f;
-            perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screen_ratio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
+            perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screenRatio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
         })
         .onKey(GLFW_KEY_X, GLFW_REPEAT, [&]() {
             fieldOfView -= 1.0f;
-            perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screen_ratio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
+            perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screenRatio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
         })
         .onMouseMove([&](double y, double x) {
             viewShouldRotate = true;
 
-            if (x < screen_width / 4) {
+            if (x < screenWidth / 4) {
                 viewRotationVector = glm::vec3(0.0f, -1.0f, 0.0f);
-            } else if (x > 3 * screen_width / 4) {
+            } else if (x > 3 * screenWidth / 4) {
                 viewRotationVector = glm::vec3(0.0f, 1.0f, 0.0f);
             } else {
                 viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -148,10 +195,10 @@ int main() {
         .onScroll([&](double y, double x) {
             if (y < 0) {
                 fieldOfView += 1.0f;
-                perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screen_ratio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
+                perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screenRatio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
             } else if (y > 0) {
                 fieldOfView -= 1.0f;
-                perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screen_ratio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
+                perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screenRatio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
             }
         })
         ;
