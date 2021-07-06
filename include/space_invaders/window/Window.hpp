@@ -11,7 +11,7 @@
 namespace space_invaders::window {
     class Window {
     public:
-        Window(const std::string& title, unsigned width, unsigned height, bool resizable);
+        Window(const std::string& title, unsigned *width, unsigned *height, bool resizable, bool fullscreen);
 
         Window& onInit(std::function<void()> initCallback);
         Window& onLoop(std::function<void()> loopCallback);
@@ -42,7 +42,7 @@ namespace space_invaders::window {
         };
 
 
-        bool initialize(const std::string& title, unsigned width, unsigned height, bool resizable);
+        bool initialize(const std::string& title, unsigned *width, unsigned *height, bool resizable, bool fullscreen);
         static void keyEventManager(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods);
         static void mouseButtonEventManager(GLFWwindow *glfwWindow, int button, int action, int mods);
         static void cursorPositionCallback(GLFWwindow *glfwWindow, double x, double y);
