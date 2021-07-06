@@ -26,7 +26,7 @@ namespace space_invaders::game {
                 static_cast<float>(margin),
                 static_cast<float>(margin),
                 descentSpeed,
-                squadronY + static_cast<float>(i),
+                squadronY + static_cast<float>(i) - 0.5f,
                 true
             ));
         }
@@ -37,7 +37,7 @@ namespace space_invaders::game {
             static_cast<float>(invadersPerRow - 1) / 2.0f + static_cast<float>(margin),
             static_cast<float>(invadersPerRow - 1) / 2.0f + static_cast<float>(margin),
             descentSpeed,
-            squadronY + static_cast<float>(this->rowLimit - 1),
+            squadronY + static_cast<float>(this->rowLimit - 1) - 0.5f,
             false
         ));
     }
