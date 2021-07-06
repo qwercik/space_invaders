@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <space_invaders/window/Window.hpp>
 #include <space_invaders/shader/ConstantShaderSet.hpp>
+#include <space_invaders/shader/LambertShaderSet.hpp>
 #include <space_invaders/shader/LambertTexturedShaderSet.hpp>
 #include <space_invaders/shader/PhongShaderSet.hpp>
 #include <space_invaders/shader/TexturedShaderSet.hpp>
@@ -21,6 +22,7 @@
 
 using space_invaders::window::Window;
 using space_invaders::shader::ConstantShaderSet;
+using space_invaders::shader::LambertShaderSet;
 using space_invaders::shader::LambertTexturedShaderSet;
 using space_invaders::shader::TexturedShaderSet;
 using space_invaders::shader::PhongShaderSet;
@@ -44,7 +46,8 @@ int main() {
 
     Cube cube;
     ConstantShaderSet constantShaders;
-    LambertTexturedShaderSet lambertShaders;
+    LambertShaderSet lambertShaders;
+    LambertTexturedShaderSet texturedLambertShaders;
     PhongShaderSet phongShaders;
     CubeMapShaderSet cubeMapShaders;
     CubeMapTexture cubeMapTexture({
@@ -83,8 +86,8 @@ int main() {
     TexturedModel invader3("../models/invader_03.obj", "../textures/alien_3.png");
     TexturedModel teapot(Teapot(), "../textures/spaceship.png");
 
-    auto sunModel = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 10.0f, 0.0f));
-    auto moonModel = glm::translate(glm::mat4(1.0f), glm::vec3(-7.5f, 8.0f, 0.0f));
+    auto sunModel = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.0f, 0.0f));
+    auto moonModel = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(-7.5f, 0.0f, 0.0f)), glm::vec3(0.2f, 0.2f, 0.2f));
 
     window
         .onInit([]() {
@@ -102,19 +105,15 @@ int main() {
             glUniformMatrix4fv(constantShaders.uniform("M"), 1, false, glm::value_ptr(sunModel));
             glUniformMatrix4fv(constantShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
             glUniformMatrix4fv(constantShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
-            glUniform4f(constantShaders.uniform("color"), 1.0f, 0.0f, 0.0f, 1.0f);
+            glUniform4f(constantShaders.uniform("color"), 0.98f, 0.99f, 0.38f, 1.0f);
             cube.draw(constantShaders);
             
             constantShaders.use();
             glUniformMatrix4fv(constantShaders.uniform("M"), 1, false, glm::value_ptr(moonModel));
             glUniformMatrix4fv(constantShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
             glUniformMatrix4fv(constantShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
-            glUniform4f(constantShaders.uniform("color"), 0.0f, 1.0f, 0.0f, 1.0f);
+            glUniform4f(constantShaders.uniform("color"), 0.71f, 0.71f, 0.68f, 1.0f);
             cube.draw(constantShaders);
-
-
-
-
             glDepthMask(GL_TRUE);
 
             phongShaders.use();
