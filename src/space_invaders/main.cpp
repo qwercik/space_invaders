@@ -34,8 +34,8 @@ using space_invaders::game::Squadron;
 using space_invaders::game::Invader;
 
 const float INITIAL_FIELD_OF_VIEW = 50.0f;
-const float NEAR_CLIPPING_PANE = 0.1f;
-const float FAR_CLIPPING_PANE = 10.0f;
+const float NEAR_CLIPPING_PANE = 0.02f;
+const float FAR_CLIPPING_PANE = 20.0f;
 
 const int NUMBER_OF_ROWS = 6;
 const int INVADERS_PER_ROW = 10;
@@ -116,6 +116,7 @@ int main() {
             glDepthMask(GL_TRUE);
 
             lambertShaders.use();
+
             glUniformMatrix4fv(lambertShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
             glUniformMatrix4fv(lambertShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
             do {

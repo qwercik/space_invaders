@@ -18,6 +18,9 @@ namespace space_invaders::model {
         HierarchicalModel(HierarchicalModel&& model);
 
         HierarchicalModel& addChild(std::unique_ptr<HierarchicalModel>&& child);
+        std::list<std::unique_ptr<HierarchicalModel>>& getChildren();
+        const std::list<std::unique_ptr<HierarchicalModel>>& getChildren() const;
+
         glm::mat4& getModelMatrix();
         const glm::mat4& getModelMatrix() const;
         glm::mat4 calculateEffectiveModelMatrix() const;

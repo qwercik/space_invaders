@@ -25,6 +25,14 @@ namespace space_invaders::model {
         this->children.push_back(std::move(child));
         return *this;
     }
+
+    std::list<std::unique_ptr<HierarchicalModel>>& HierarchicalModel::getChildren() {
+        return this->children;
+    }
+
+    const std::list<std::unique_ptr<HierarchicalModel>>& HierarchicalModel::getChildren() const {
+        return this->children;
+    }
     
     glm::mat4& HierarchicalModel::getModelMatrix() {
         return this->modelMatrix; 
