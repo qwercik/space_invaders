@@ -26,7 +26,7 @@ namespace space_invaders::game {
                 static_cast<float>(margin),
                 static_cast<float>(margin),
                 descentSpeed,
-                squadronY + static_cast<float>(i),
+                squadronY + static_cast<float>(i) - 0.5f,
                 true
             ));
         }
@@ -37,7 +37,7 @@ namespace space_invaders::game {
             static_cast<float>(invadersPerRow - 1) / 2.0f + static_cast<float>(margin),
             static_cast<float>(invadersPerRow - 1) / 2.0f + static_cast<float>(margin),
             descentSpeed,
-            squadronY + static_cast<float>(this->rowLimit - 1),
+            squadronY + static_cast<float>(this->rowLimit - 1) - 0.5f,
             false
         ));
     }
@@ -68,5 +68,16 @@ namespace space_invaders::game {
     void Squadron::moveShips(float time) {
         for (int i = 0; i < this->rowLimit; ++i)
             this->waves.at(i).moveShips(time);
+    }
+
+    int Squadron::checkState() {
+        // 0 - nothing special, 1 - defeat, 2 - victory
+        for (auto i : this->waves) {
+            if (i.getAlive() != 0) {
+                if (i.getY() < 0.0f) return 1;
+                else return 0;
+            }
+        }
+        return 2;
     }
 }

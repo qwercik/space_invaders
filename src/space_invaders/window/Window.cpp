@@ -70,7 +70,6 @@ namespace space_invaders::window {
     }
 
     int Window::run() {
-        glfwSetTime(0.0f);
         if (!this->ok) {
             return EXIT_FAILURE;
         }
@@ -79,6 +78,7 @@ namespace space_invaders::window {
             this->initCallback();
         }
 
+        glfwSetTime(0.0f);
         while (!glfwWindowShouldClose(window)) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

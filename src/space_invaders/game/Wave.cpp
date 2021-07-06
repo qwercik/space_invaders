@@ -13,6 +13,7 @@ namespace space_invaders::game {
     ) :
         invaderIndex{0},
         invaderLimit{invaderNumber},
+        invadersAlive{invaderNumber},
         margin{margin},
         positionX{positionX},
         speedY{speedY},
@@ -38,6 +39,8 @@ namespace space_invaders::game {
     void Wave::resetInvader() {this->invaderIndex = 0;}
 
     int Wave::getType() {return this->invaders.at(this->invaderIndex).type;}
+
+    int Wave::getAlive() {return this->invadersAlive;}
 
     float Wave::getX() {return static_cast<float>(this->invaders.at(this->invaderIndex).x) + this->positionX;}
 
