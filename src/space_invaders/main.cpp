@@ -20,6 +20,7 @@
 #include <space_invaders/model/HierarchicalModel.hpp>
 
 using space_invaders::window::Window;
+using space_invaders::shader::ConstantShaderSet;
 using space_invaders::shader::LambertTexturedShaderSet;
 using space_invaders::shader::TexturedShaderSet;
 using space_invaders::shader::PhongShaderSet;
@@ -36,12 +37,13 @@ const int SCREEN_HEIGHT = 600;
 const float INITIAL_FIELD_OF_VIEW = 50.0f;
 const float SCREEN_RATIO = static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT);
 const float NEAR_CLIPPING_PANE = 0.02f;
-const float FAR_CLIPPING_PANE = 20.0f;
+const float FAR_CLIPPING_PANE = 100.0f;
 
 int main() {
     Window window("Space Invaders", SCREEN_WIDTH, SCREEN_HEIGHT, true);
 
     Cube cube;
+    ConstantShaderSet constantShaders;
     LambertTexturedShaderSet lambertShaders;
     PhongShaderSet phongShaders;
     CubeMapShaderSet cubeMapShaders;
@@ -81,6 +83,9 @@ int main() {
     TexturedModel invader3("../models/invader_03.obj", "../textures/alien_3.png");
     TexturedModel teapot(Teapot(), "../textures/spaceship.png");
 
+    auto sunModel = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 10.0f, 0.0f));
+    auto moonModel = glm::translate(glm::mat4(1.0f), glm::vec3(-7.5f, 8.0f, 0.0f));
+
     window
         .onInit([]() {
             glClearColor(0.1f, 0.1f, 0.1f, 1.f);
@@ -92,6 +97,24 @@ int main() {
             glUniformMatrix4fv(cubeMapShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
             glUniformMatrix4fv(cubeMapShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
             cube.draw(cubeMapShaders);
+            
+            constantShaders.use();
+            glUniformMatrix4fv(constantShaders.uniform("M"), 1, false, glm::value_ptr(sunModel));
+            glUniformMatrix4fv(constantShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+            glUniformMatrix4fv(constantShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            glUniform4f(constantShaders.uniform("color"), 1.0f, 0.0f, 0.0f, 1.0f);
+            cube.draw(constantShaders);
+            
+            constantShaders.use();
+            glUniformMatrix4fv(constantShaders.uniform("M"), 1, false, glm::value_ptr(moonModel));
+            glUniformMatrix4fv(constantShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+            glUniformMatrix4fv(constantShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            glUniform4f(constantShaders.uniform("color"), 0.0f, 1.0f, 0.0f, 1.0f);
+            cube.draw(constantShaders);
+
+
+
+
             glDepthMask(GL_TRUE);
 
             phongShaders.use();
@@ -113,10 +136,10 @@ int main() {
             viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         })
         .onKey(GLFW_KEY_UP, GLFW_REPEAT, [&]() {
-            viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+            viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         })
         .onKey(GLFW_KEY_DOWN, GLFW_REPEAT, [&]() {
-            viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
         })
         .onKey(GLFW_KEY_Z, GLFW_REPEAT, [&]() {
             fieldOfView += 1.0f;
@@ -128,14 +151,31 @@ int main() {
         })
         .onMouseMove([&](double y, double x) {
             viewShouldRotate = true;
-
             if (x < SCREEN_WIDTH / 4) {
-                viewRotationVector = glm::vec3(0.0f, -1.0f, 0.0f);
+                if (y < SCREEN_HEIGHT / 4) {
+                    viewRotationVector = glm::vec3(1.0f, -1.0f, 0.0f);
+                } else if (y > 3 * SCREEN_HEIGHT / 4) {
+                    viewRotationVector = glm::vec3(-1.0f, -1.0f, 0.0f);
+                } else {
+                    viewRotationVector = glm::vec3(0.0f, -1.0f, 0.0f);
+                }
             } else if (x > 3 * SCREEN_WIDTH / 4) {
-                viewRotationVector = glm::vec3(0.0f, 1.0f, 0.0f);
+                if (y < SCREEN_HEIGHT / 4) {
+                    viewRotationVector = glm::vec3(1.0f, 1.0f, 0.0f);
+                } else if (y > 3 * SCREEN_HEIGHT / 4) {
+                    viewRotationVector = glm::vec3(-1.0f, 1.0f, 0.0f);
+                } else {
+                    viewRotationVector = glm::vec3(0.0f, 1.0f, 0.0f);
+                }
             } else {
-                viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
-                viewShouldRotate = false;
+                if (y < SCREEN_HEIGHT / 4) {
+                    viewRotationVector = glm::vec3(1.0f, 0.0f, 0.0f);
+                } else if (y > 3 * SCREEN_HEIGHT / 4) {
+                    viewRotationVector = glm::vec3(-1.0f, 0.0f, 0.0f);
+                } else {
+                    viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
+                    viewShouldRotate = false;
+                }
             }
         })
         .onMouseLeave([]() {
