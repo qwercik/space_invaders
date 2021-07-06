@@ -17,6 +17,7 @@ namespace space_invaders::game {
         bool nextInvader();
         void resetInvader();
         int getType();
+        int getAlive();
         float getX();
         float getY();
         void moveShips(float time);
@@ -24,6 +25,7 @@ namespace space_invaders::game {
     private:
         int invaderIndex;
         int invaderLimit;
+        int invadersAlive;
         float margin;
         float speedX;
         float positionX;

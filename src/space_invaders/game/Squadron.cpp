@@ -69,4 +69,15 @@ namespace space_invaders::game {
         for (int i = 0; i < this->rowLimit; ++i)
             this->waves.at(i).moveShips(time);
     }
+
+    int Squadron::checkState() {
+        // 0 - nothing special, 1 - defeat, 2 - victory
+        for (auto i : this->waves) {
+            if (i.getAlive() != 0) {
+                if (i.getY() < 0.0f) return 1;
+                else return 0;
+            }
+        }
+        return 2;
+    }
 }

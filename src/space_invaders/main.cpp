@@ -52,7 +52,8 @@ const float INVADERS_SPEED = 0.3f;
 const float SPACESHIP_SPEED = 6.0f;
 
 int main() {
-    Squadron squadron(NUMBER_OF_ROWS, INVADERS_PER_ROW, UFO, MARGIN, INITIAL_SQUADRON_HEIGHT, INVADERS_SPEED);
+    Squadron squadronTemplate(NUMBER_OF_ROWS, INVADERS_PER_ROW, UFO, MARGIN, INITIAL_SQUADRON_HEIGHT, INVADERS_SPEED);
+    Squadron squadron = squadronTemplate;
     Spaceship spaceship(INVADERS_PER_ROW + 2 * MARGIN, SPACESHIP_SPEED);
 
     unsigned screenWidth = 600;
@@ -163,6 +164,7 @@ int main() {
             spaceship.move(time);
 
             squadron.resetInvader();
+            if (squadron.checkState() != 0) squadron = squadronTemplate;
         })
         .onKey(GLFW_KEY_LEFT, GLFW_PRESS, [&]() {
             spaceship.setDirection(-1);

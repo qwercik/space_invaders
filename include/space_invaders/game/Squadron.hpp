@@ -12,6 +12,7 @@ namespace space_invaders::game {
         float getX();
         float getY();
         void moveShips(float time);
+        int checkState();
 
     private:
         int rowIndex;
