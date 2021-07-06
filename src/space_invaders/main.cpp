@@ -86,8 +86,11 @@ int main() {
     TexturedModel invader3("../models/invader_03.obj", "../textures/alien_3.png");
     TexturedModel teapot(Teapot(), "../textures/spaceship.png");
 
-    auto sunModel = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.0f, 0.0f));
-    auto moonModel = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(-7.5f, 0.0f, 0.0f)), glm::vec3(0.2f, 0.2f, 0.2f));
+    auto sunPosition = glm::vec3(10.0f, 0.0f, 0.0f);
+    auto moonPosition = glm::vec3(-7.5f, 0.0f, 0.0f);
+
+    auto sunModel = glm::translate(glm::mat4(1.0f), sunPosition);
+    auto moonModel = glm::scale(glm::translate(glm::mat4(1.0f), moonPosition), glm::vec3(0.2f, 0.2f, 0.2f));
 
     window
         .onInit([]() {
@@ -120,6 +123,8 @@ int main() {
             glUniformMatrix4fv(phongShaders.uniform("M"), 1, false, glm::value_ptr(modelMatrix));
             glUniformMatrix4fv(phongShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
             glUniformMatrix4fv(phongShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            glUniform4fv(phongShaders.uniform("sun"), false, glm::value_ptr(sunPosition));
+            glUniform4fv(phongShaders.uniform("moon"), false, glm::value_ptr(moonPosition));
             mainShip.draw(phongShaders);
 
             modelMatrix = glm::rotate(modelMatrix, glm::radians(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
