@@ -121,7 +121,7 @@ int main() {
     auto viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
     bool viewShouldRotate = false;
     
-    auto sunPosition = glm::vec3(0.0f, 10.0f, 0.0f);
+    auto sunPosition = glm::vec3(30.0f, 0.0f, 0.0f);
     auto moonPosition = glm::vec3(0.0f, 1.0f, -10.0f);
 
     auto sunModel = glm::translate(glm::mat4(1.0f), sunPosition);
@@ -273,7 +273,7 @@ int main() {
                 cubeMapModel = glm::rotate(cubeMapModel, glm::radians(1.0f), viewRotationVector);
                 sunModel = glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * sunModel;
                 moonModel = glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * moonModel;
-                sunPosition = glm::vec4(glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * glm::vec4(sunPosition, 1.0f));
+                sunPosition = glm::vec3(glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * glm::vec4(sunPosition, 1.0f));
                 moonPosition = glm::vec3(glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * glm::vec4(moonPosition, 1.0f));
             }
         })
