@@ -76,7 +76,7 @@ int main() {
         INVADERS_SPEED
     );
     Squadron squadron = squadronTemplate;
-    Spaceship spaceship(SPACESHIP_HEALTH, INVADERS_PER_ROW + 2 * MARGIN, SPACESHIP_SPEED);
+    Spaceship spaceship(SPACESHIP_HEALTH, INVADERS_PER_ROW - 1 + 2 * MARGIN, SPACESHIP_SPEED);
     BulletTracker bulletTracker(SHOT_SPEED, SPACESHIP_SHOT_COOLDOWN, SQUADRON_SHOT_COOLDOWN);
     PiggyBank piggyBank;
 
@@ -197,8 +197,8 @@ int main() {
             phongShaders.use();
             glUniformMatrix4fv(phongShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
             glUniformMatrix4fv(phongShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
-            glUniform4fv(phongShaders.uniform("sun"), false, glm::value_ptr(sunPosition));
-            glUniform4fv(phongShaders.uniform("moon"), false, glm::value_ptr(moonPosition));
+            glUniform3fv(phongShaders.uniform("sun"), 1, glm::value_ptr(sunPosition));
+            glUniform3fv(phongShaders.uniform("moon"), 1, glm::value_ptr(moonPosition));
 
             squadron.resetInvader();
             do {
@@ -273,7 +273,7 @@ int main() {
                 cubeMapModel = glm::rotate(cubeMapModel, glm::radians(1.0f), viewRotationVector);
                 sunModel = glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * sunModel;
                 moonModel = glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * moonModel;
-                sunPosition = glm::vec4(glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * glm::vec4(sunPosition, 1.0f));
+                sunPosition = glm::vec3(glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * glm::vec4(sunPosition, 1.0f));
                 moonPosition = glm::vec3(glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * glm::vec4(moonPosition, 1.0f));
             }
         })

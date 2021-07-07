@@ -5,7 +5,9 @@
 
 - :arrow_backward: :arrow_forward: | ship movement
 - :arrow_up_small: :arrow_down_small: | camera control
+- :regional_indicator_a: :regional_indicator_d: | ship rotation
 - `SPACEBAR` | fire a projectile
+- :mouse_three_button: movements | world rotation
 
 ## Build instructions
 To build the game run the following commands:
