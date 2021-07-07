@@ -1,11 +1,11 @@
 #include <space_invaders/game/Squadron.hpp>
-#include <space_invaders/game/Wave.hpp>
 
 namespace space_invaders::game {
     Squadron::Squadron(
         int numberOfRows,
         int invadersPerRow,
-        bool ufo, int margin,
+        bool ufo,
+        int margin,
         float squadronY,
         float descentSpeed
     ) :
@@ -65,19 +65,38 @@ namespace space_invaders::game {
 
     float Squadron::getY() {return this->waves.at(this->rowIndex).getY();}
 
+    bool Squadron::isAlive() {return this->waves.at(this->rowIndex).isAlive();}
+
     void Squadron::moveShips(float time) {
-        for (int i = 0; i < this->rowLimit; ++i)
-            this->waves.at(i).moveShips(time);
+        for (auto &wave : this->waves)
+            wave.moveShips(time);
     }
 
     int Squadron::checkState() {
         // 0 - nothing special, 1 - defeat, 2 - victory
-        for (auto i : this->waves) {
-            if (i.getAlive() != 0) {
-                if (i.getY() < 0.0f) return 1;
+        for (auto &wave : this->waves) {
+            if (wave.getAlive() != 0) {
+                if (wave.getY() < 0.0f) return 1;
                 else return 0;
             }
         }
         return 2;
     }
+
+    int Squadron::killClosest(float x, float y) {
+        for (auto &wave : this->waves) {
+            switch (Bullet::checkYCollision(y, wave.getY())) {
+                case -1:
+                    return -1;
+                case 0:
+                    if (wave.killClosest(x) == 0) return 0;
+                    break;
+            }
+        }
+        return 1;
+    }
+
+//    Bullet Squadron::randomShot() {
+//
+//    }
 }

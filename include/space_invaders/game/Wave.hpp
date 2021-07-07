@@ -1,6 +1,7 @@
 #pragma once
 
 #include <space_invaders/game/Invader.hpp>
+#include <space_invaders/game/Bullet.hpp>
 
 namespace space_invaders::game {
     class Wave {
@@ -20,7 +21,9 @@ namespace space_invaders::game {
         int getAlive();
         float getX();
         float getY();
+        bool isAlive();
         void moveShips(float time);
+        int killClosest(float x);
 
     private:
         int invaderIndex;

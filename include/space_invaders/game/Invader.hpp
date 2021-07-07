@@ -10,5 +10,6 @@ namespace space_invaders::game {
         bool alive;
         int type;
         int x;
+        float cooldown;
     };
 }

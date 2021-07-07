@@ -1,5 +1,4 @@
 #include <space_invaders/game/Wave.hpp>
-#include <space_invaders/game/Invader.hpp>
 
 namespace space_invaders::game {
     Wave::Wave(
@@ -46,6 +45,8 @@ namespace space_invaders::game {
 
     float Wave::getY() {return positionY;}
 
+    bool Wave::isAlive() {return this->invaders.at(this->invaderIndex).alive;}
+
     void Wave::moveShips(float time) {
         positionX += (this->positiveDirection ? 1.0f : -1.0f) * this->speedX * time;
         if (this->margin < abs(this->positionX - this->margin)) {
@@ -55,5 +56,22 @@ namespace space_invaders::game {
                 (this->margin - abs(this->positionX - this->margin));
         }
         positionY -= this->speedY * time;
+    }
+
+    int Wave::killClosest(float x) {
+        for (auto &invader : this->invaders) {
+            switch (Bullet::checkYCollision(x - this->positionX, static_cast<float>(invader.x))) {
+                case -1:
+                    return -1;
+                case 0:
+                    if (invader.alive) {
+                        invader.alive = false;
+                        --this->invadersAlive;
+                        return 0;
+                    }
+                    break;
+            }
+        }
+        return 1;
     }
 }

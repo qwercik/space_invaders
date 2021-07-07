@@ -19,9 +19,11 @@
 #include <space_invaders/model/HierarchicalModel.hpp>
 #include <space_invaders/game/Squadron.hpp>
 #include <space_invaders/game/Spaceship.hpp>
+#include <space_invaders/game/BulletTracker.hpp>
 
 
 using space_invaders::window::Window;
+using space_invaders::shader::ConstantShaderSet;
 using space_invaders::shader::LambertTexturedShaderSet;
 using space_invaders::shader::TexturedShaderSet;
 using space_invaders::shader::CubeMapShaderSet;
@@ -29,10 +31,13 @@ using space_invaders::model::HierarchicalModel;
 using space_invaders::model::predefined::Cube;
 using space_invaders::model::predefined::Teapot;
 using space_invaders::model::predefined::Wall;
+using space_invaders::model::BasicModel;
 using space_invaders::model::TexturedModel;
 using space_invaders::texture::CubeMapTexture;
 using space_invaders::game::Squadron;
 using space_invaders::game::Spaceship;
+using space_invaders::game::Bullet;
+using space_invaders::game::BulletTracker;
 
 const float INITIAL_FIELD_OF_VIEW = 50.0f;
 const float NEAR_CLIPPING_PANE = 0.02f;
@@ -49,12 +54,23 @@ const float SHIP_GAP_MULTIPLIER = 1.0f;
 const float TRANSLATE_VALUE = SHIP_SIZE_MULTIPLIER * SHIP_GAP_MULTIPLIER;
 const float INITIAL_SQUADRON_HEIGHT = 10.0f;
 const float INVADERS_SPEED = 0.3f;
+const int SPACESHIP_HEALTH = 3; // -1 to activate god mode
 const float SPACESHIP_SPEED = 6.0f;
+const float SHOT_SPEED = 6.0f;
+const float SHOT_COOLDOWN = 1.0f;
 
 int main() {
-    Squadron squadronTemplate(NUMBER_OF_ROWS, INVADERS_PER_ROW, UFO, MARGIN, INITIAL_SQUADRON_HEIGHT, INVADERS_SPEED);
+    Squadron squadronTemplate(
+        NUMBER_OF_ROWS,
+        INVADERS_PER_ROW,
+        UFO,
+        MARGIN,
+        INITIAL_SQUADRON_HEIGHT,
+        INVADERS_SPEED
+    );
     Squadron squadron = squadronTemplate;
-    Spaceship spaceship(INVADERS_PER_ROW + 2 * MARGIN, SPACESHIP_SPEED);
+    Spaceship spaceship(SPACESHIP_HEALTH, INVADERS_PER_ROW + 2 * MARGIN, SPACESHIP_SPEED);
+    BulletTracker bulletTracker(SHOT_SPEED, SHOT_COOLDOWN);
 
     unsigned screenWidth = 600;
     unsigned screenHeight = 600;
@@ -63,6 +79,7 @@ int main() {
 
 
     Cube cube;
+    ConstantShaderSet constantShaders;
     TexturedShaderSet lambertShaders;
     CubeMapShaderSet cubeMapShaders;
     CubeMapTexture cubeMapTexture({
@@ -84,6 +101,7 @@ int main() {
     TexturedModel invader3("../models/invader_03.obj", "../textures/alien_3.png");
     TexturedModel ufo("../models/ufo.obj", "../textures/spaceship.png");
     TexturedModel mainShip("../models/main_ship.obj", "../textures/spaceship.png");
+    BasicModel projectile("../models/projectile.obj");
 
     float fieldOfView = INITIAL_FIELD_OF_VIEW;
     auto viewMatrix = glm::lookAt(
@@ -126,6 +144,7 @@ int main() {
             glUniformMatrix4fv(lambertShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
             glUniformMatrix4fv(lambertShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
             do {
+                if (!squadron.isAlive()) continue;
                 glUniformMatrix4fv(lambertShaders.uniform("M"), 1, false, glm::value_ptr(
                     glm::translate(
                         glm::mat4(1.0f),
@@ -152,19 +171,40 @@ int main() {
             glUniformMatrix4fv(lambertShaders.uniform("M"), 1, false, glm::value_ptr(
                 glm::translate(
                     glm::mat4(1.0f),
-                    glm::vec3(TRANSLATE_VALUE * spaceship.getX(), TRANSLATE_VALUE * -1.0f, 0.0f)
+                    glm::vec3(TRANSLATE_VALUE * spaceship.getX(), TRANSLATE_VALUE * spaceship.getY(), 0.0f)
                 ) * gameModelMatrix
             ));
             mainShip.draw(lambertShaders);
+
+            constantShaders.use();
+
+            glUniformMatrix4fv(constantShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+            glUniformMatrix4fv(constantShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            glUniform4f(constantShaders.uniform("color"), 1.0f, 1.0f, 0.0f, 1.0f);
+            for (auto &bullet : *bulletTracker.getBullets()) {
+                glUniformMatrix4fv(constantShaders.uniform("M"), 1, false, glm::value_ptr(
+                    glm::translate(
+                        glm::mat4(1.0f),
+                        glm::vec3(TRANSLATE_VALUE * bullet.getX(), TRANSLATE_VALUE * bullet.getY(), 0.0f)
+                    ) * gameModelMatrix
+                ));
+                projectile.draw(constantShaders);
+            }
 
             if (viewShouldRotate) {
                 viewMatrix = glm::rotate(viewMatrix, glm::radians(0.5f), viewRotationVector);
             }
             squadron.moveShips(time);
             spaceship.move(time);
+            bulletTracker.moveBullets(time);
+
+            bulletTracker.manageCollisions(&squadron, &spaceship);
 
             squadron.resetInvader();
-            if (squadron.checkState() != 0) squadron = squadronTemplate;
+            if (squadron.checkState() != 0) {
+                squadron = squadronTemplate;
+                std::cout << "Game over";
+            }
         })
         .onKey(GLFW_KEY_LEFT, GLFW_PRESS, [&]() {
             spaceship.setDirection(-1);
@@ -177,6 +217,9 @@ int main() {
         })
         .onKey(GLFW_KEY_LEFT, GLFW_RELEASE, [&]() {
             spaceship.modifyDirection(1);
+        })
+        .onKey(GLFW_KEY_SPACE, GLFW_PRESS, [&]() {
+            bulletTracker.shootInvaders(&spaceship, time);
         })
         .onKey(GLFW_KEY_UP, GLFW_REPEAT, [&]() {
             viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
