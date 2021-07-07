@@ -121,7 +121,7 @@ int main() {
     auto viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
     bool viewShouldRotate = false;
     
-    auto sunPosition = glm::vec3(0.0f, 10.0f, 0.0f);
+    auto sunPosition = glm::vec3(30.0f, 0.0f, 0.0f);
     auto moonPosition = glm::vec3(0.0f, 1.0f, -10.0f);
 
     auto sunModel = glm::translate(glm::mat4(1.0f), sunPosition);
