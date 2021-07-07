@@ -273,8 +273,8 @@ int main() {
                 cubeMapModel = glm::rotate(cubeMapModel, glm::radians(1.0f), viewRotationVector);
                 sunModel = glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * sunModel;
                 moonModel = glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * moonModel;
-                sunPosition = glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * glm::vec4(sunPosition, 1.0f);
-                moonPosition = glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * glm::vec4(moonPosition, 1.0f);
+                sunPosition = glm::vec4(glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * glm::vec4(sunPosition, 1.0f));
+                moonPosition = glm::vec3(glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * glm::vec4(moonPosition, 1.0f));
             }
         })
         .onKey(GLFW_KEY_A, GLFW_REPEAT, [&]() {
