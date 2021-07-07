@@ -227,9 +227,9 @@ int main() {
             } while(squadron.nextInvader());
 
             glUniformMatrix4fv(lambertShaders.uniform("M"), 1, false, glm::value_ptr(
-                glm::translate(spaceshipMatrix,
+                glm::translate(glm::mat4(1.0f),
                     glm::vec3(0.0f, 0.0f, -TRANSLATE_VALUE * spaceship.getY())
-                ) * gameModelMatrix * modelMatrix
+                ) * gameModelMatrix * spaceshipMatrix * modelMatrix
             ));
             mainShip.draw(phongShaders);
 
@@ -271,8 +271,10 @@ int main() {
 
             if (viewShouldRotate) {
                 cubeMapModel = glm::rotate(cubeMapModel, glm::radians(1.0f), viewRotationVector);
-                sunModel = glm::rotate(sunModel, glm::radians(1.0f), viewRotationVector);
-                moonModel = glm::rotate(moonModel, glm::radians(1.0f), viewRotationVector);
+                sunModel = glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * sunModel;
+                moonModel = glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * moonModel;
+                sunPosition = glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * glm::vec4(sunPosition, 1.0f);
+                moonPosition = glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * glm::vec4(moonPosition, 1.0f);
             }
         })
         .onKey(GLFW_KEY_A, GLFW_REPEAT, [&]() {
@@ -294,25 +296,25 @@ int main() {
             viewShouldRotate = true;
             if (x < screenWidth / 4) {
                 if (y < screenHeight / 4) {
-                    viewRotationVector = glm::vec3(1.0f, -1.0f, 0.0f);
-                } else if (y > 3 * screenHeight / 4) {
                     viewRotationVector = glm::vec3(-1.0f, -1.0f, 0.0f);
+                } else if (y > 3 * screenHeight / 4) {
+                    viewRotationVector = glm::vec3(1.0f, -1.0f, 0.0f);
                 } else {
                     viewRotationVector = glm::vec3(0.0f, -1.0f, 0.0f);
                 }
             } else if (x > 3 * screenWidth / 4) {
                 if (y < screenHeight / 4) {
-                    viewRotationVector = glm::vec3(1.0f, 1.0f, 0.0f);
-                } else if (y > 3 * screenHeight / 4) {
                     viewRotationVector = glm::vec3(-1.0f, 1.0f, 0.0f);
+                } else if (y > 3 * screenHeight / 4) {
+                    viewRotationVector = glm::vec3(1.0f, 1.0f, 0.0f);
                 } else {
                     viewRotationVector = glm::vec3(0.0f, 1.0f, 0.0f);
                 }
             } else {
                 if (y < screenHeight / 4) {
-                    viewRotationVector = glm::vec3(1.0f, 0.0f, 0.0f);
-                } else if (y > 3 * screenHeight / 4) {
                     viewRotationVector = glm::vec3(-1.0f, 0.0f, 0.0f);
+                } else if (y > 3 * screenHeight / 4) {
+                    viewRotationVector = glm::vec3(1.0f, 0.0f, 0.0f);
                 } else {
                     viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
                     viewShouldRotate = false;
