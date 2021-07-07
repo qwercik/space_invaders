@@ -25,6 +25,7 @@ add_executable(space_invaders
     include/space_invaders/shader/TexturedShaderSet.hpp
     include/space_invaders/shader/LambertTexturedShaderSet.hpp
     include/space_invaders/shader/CubeMapShaderSet.hpp
+    include/space_invaders/shader/PhongShaderSet.hpp
     src/space_invaders/shader/Shader.cpp
     src/space_invaders/shader/ShaderSet.cpp
     src/space_invaders/shader/ConstantShaderSet.cpp
@@ -32,6 +33,7 @@ add_executable(space_invaders
     src/space_invaders/shader/TexturedShaderSet.cpp
     src/space_invaders/shader/LambertTexturedShaderSet.cpp
     src/space_invaders/shader/CubeMapShaderSet.cpp
+    src/space_invaders/shader/PhongShaderSet.cpp
 
     # Models
     include/space_invaders/model/Model.hpp

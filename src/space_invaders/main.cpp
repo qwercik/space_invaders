@@ -8,7 +8,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <space_invaders/window/Window.hpp>
 #include <space_invaders/shader/ConstantShaderSet.hpp>
+#include <space_invaders/shader/LambertShaderSet.hpp>
 #include <space_invaders/shader/LambertTexturedShaderSet.hpp>
+#include <space_invaders/shader/PhongShaderSet.hpp>
 #include <space_invaders/shader/TexturedShaderSet.hpp>
 #include <space_invaders/shader/CubeMapShaderSet.hpp>
 #include <space_invaders/texture/CubeMapTexture.hpp>
@@ -25,8 +27,10 @@
 
 using space_invaders::window::Window;
 using space_invaders::shader::ConstantShaderSet;
+using space_invaders::shader::LambertShaderSet;
 using space_invaders::shader::LambertTexturedShaderSet;
 using space_invaders::shader::TexturedShaderSet;
+using space_invaders::shader::PhongShaderSet;
 using space_invaders::shader::CubeMapShaderSet;
 using space_invaders::model::HierarchicalModel;
 using space_invaders::model::predefined::Cube;
@@ -43,7 +47,7 @@ using space_invaders::game::PiggyBank;
 
 const float INITIAL_FIELD_OF_VIEW = 55.0f;
 const float NEAR_CLIPPING_PANE = 0.02f;
-const float FAR_CLIPPING_PANE = 20.0f;
+const float FAR_CLIPPING_PANE = 100.0f;
 
 const int NUMBER_OF_ROWS = 6;
 const int INVADERS_PER_ROW = 10;
@@ -84,7 +88,8 @@ int main() {
 
     Cube cube;
     ConstantShaderSet constantShaders;
-    TexturedShaderSet lambertShaders;
+    LambertTexturedShaderSet lambertShaders;
+    PhongShaderSet phongShaders;
     CubeMapShaderSet cubeMapShaders;
     CubeMapTexture cubeMapTexture({
         "../textures/skybox/right.png",
@@ -113,7 +118,16 @@ int main() {
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
 
+    auto viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
+    bool viewShouldRotate = false;
+    
+    auto sunPosition = glm::vec3(30.0f, 0.0f, 0.0f);
+    auto moonPosition = glm::vec3(0.0f, 1.0f, -10.0f);
 
+    auto sunModel = glm::translate(glm::mat4(1.0f), sunPosition);
+    auto moonModel = glm::scale(glm::translate(glm::mat4(1.0f), moonPosition), glm::vec3(0.2f, 0.2f, 0.2f));
+
+    float fieldOfView = INITIAL_FIELD_OF_VIEW;
     auto perspectiveMatrix = glm::perspective(glm::radians(INITIAL_FIELD_OF_VIEW), screenRatio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
 
     auto gameModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(
@@ -123,6 +137,8 @@ int main() {
     ));
     auto squadronModelMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     auto modelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(SHIP_SIZE_MULTIPLIER));
+    auto spaceshipMatrix = glm::mat4(1.0f);
+    auto cubeMapModel = glm::mat4(1.0f);
 
     auto worldModelMatrix = glm::mat4(1.0f);
 
@@ -158,15 +174,31 @@ int main() {
 
             glDepthMask(GL_FALSE);
             cubeMapShaders.use();
+            glUniformMatrix4fv(cubeMapShaders.uniform("M"), 1, false, glm::value_ptr(cubeMapModel));
             glUniformMatrix4fv(cubeMapShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
             glUniformMatrix4fv(cubeMapShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
             cube.draw(cubeMapShaders);
+            
+            constantShaders.use();
+            glUniformMatrix4fv(constantShaders.uniform("M"), 1, false, glm::value_ptr(sunModel));
+            glUniformMatrix4fv(constantShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+            glUniformMatrix4fv(constantShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            glUniform4f(constantShaders.uniform("color"), 0.98f, 0.99f, 0.38f, 1.0f);
+            cube.draw(constantShaders);
+            
+            constantShaders.use();
+            glUniformMatrix4fv(constantShaders.uniform("M"), 1, false, glm::value_ptr(moonModel));
+            glUniformMatrix4fv(constantShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+            glUniformMatrix4fv(constantShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            glUniform4f(constantShaders.uniform("color"), 0.71f, 0.71f, 0.68f, 1.0f);
+            cube.draw(constantShaders);
             glDepthMask(GL_TRUE);
 
-            lambertShaders.use();
-
-            glUniformMatrix4fv(lambertShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
-            glUniformMatrix4fv(lambertShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            phongShaders.use();
+            glUniformMatrix4fv(phongShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
+            glUniformMatrix4fv(phongShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+            glUniform4fv(phongShaders.uniform("sun"), false, glm::value_ptr(sunPosition));
+            glUniform4fv(phongShaders.uniform("moon"), false, glm::value_ptr(moonPosition));
 
             squadron.resetInvader();
             do {
@@ -180,27 +212,26 @@ int main() {
 
                 switch (squadron.getType()) {
                     case 0:
-                        invader1.draw(lambertShaders);
+                        invader1.draw(phongShaders);
                         break;
                     case 1:
-                        invader2.draw(lambertShaders);
+                        invader2.draw(phongShaders);
                         break;
                     case 2:
-                        invader3.draw(lambertShaders);
+                        invader3.draw(phongShaders);
                         break;
                     case 3:
-                        ufo.draw(lambertShaders);
+                        ufo.draw(phongShaders);
                         break;
                 }
             } while(squadron.nextInvader());
 
             glUniformMatrix4fv(lambertShaders.uniform("M"), 1, false, glm::value_ptr(
-                glm::translate(
-                    glm::mat4(1.0f),
+                glm::translate(glm::mat4(1.0f),
                     glm::vec3(0.0f, 0.0f, -TRANSLATE_VALUE * spaceship.getY())
-                ) * gameModelMatrix * modelMatrix
+                ) * gameModelMatrix * spaceshipMatrix * modelMatrix
             ));
-            mainShip.draw(lambertShaders);
+            mainShip.draw(phongShaders);
 
             constantShaders.use();
 
@@ -237,6 +268,58 @@ int main() {
             }
             if (result == 2) squadron = squadronTemplate;
             std::cout << "\rPoints: " << piggyBank.getPoints() << " | Lives: " << spaceship.getHealth();
+
+            if (viewShouldRotate) {
+                cubeMapModel = glm::rotate(cubeMapModel, glm::radians(1.0f), viewRotationVector);
+                sunModel = glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * sunModel;
+                moonModel = glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * moonModel;
+                sunPosition = glm::vec3(glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * glm::vec4(sunPosition, 1.0f));
+                moonPosition = glm::vec3(glm::rotate(glm::mat4(1.0f), glm::radians(1.0f), viewRotationVector) * glm::vec4(moonPosition, 1.0f));
+            }
+        })
+        .onKey(GLFW_KEY_A, GLFW_REPEAT, [&]() {
+            spaceshipMatrix = glm::rotate(spaceshipMatrix, glm::radians(5.0f), glm::vec3(0.0f, 0.0f, 1.f));
+        })
+        .onKey(GLFW_KEY_D, GLFW_REPEAT, [&]() {
+            spaceshipMatrix = glm::rotate(spaceshipMatrix, glm::radians(5.0f), glm::vec3(0.0f, 0.0f, -1.f));
+        })
+        .onScroll([&](double y, double x) {
+            if (y > 0) {
+                fieldOfView += 1.0f;
+            } else if (y < 0) {
+                fieldOfView -= 1.0f;
+            }
+
+            perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screenRatio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
+        })
+        .onMouseMove([&](double y, double x) {
+            viewShouldRotate = true;
+            if (x < screenWidth / 4) {
+                if (y < screenHeight / 4) {
+                    viewRotationVector = glm::vec3(-1.0f, -1.0f, 0.0f);
+                } else if (y > 3 * screenHeight / 4) {
+                    viewRotationVector = glm::vec3(1.0f, -1.0f, 0.0f);
+                } else {
+                    viewRotationVector = glm::vec3(0.0f, -1.0f, 0.0f);
+                }
+            } else if (x > 3 * screenWidth / 4) {
+                if (y < screenHeight / 4) {
+                    viewRotationVector = glm::vec3(-1.0f, 1.0f, 0.0f);
+                } else if (y > 3 * screenHeight / 4) {
+                    viewRotationVector = glm::vec3(1.0f, 1.0f, 0.0f);
+                } else {
+                    viewRotationVector = glm::vec3(0.0f, 1.0f, 0.0f);
+                }
+            } else {
+                if (y < screenHeight / 4) {
+                    viewRotationVector = glm::vec3(-1.0f, 0.0f, 0.0f);
+                } else if (y > 3 * screenHeight / 4) {
+                    viewRotationVector = glm::vec3(1.0f, 0.0f, 0.0f);
+                } else {
+                    viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
+                    viewShouldRotate = false;
+                }
+            }
         })
         .onKey(GLFW_KEY_LEFT, GLFW_PRESS, [&]() {
             spaceship.setDirection(-1);
