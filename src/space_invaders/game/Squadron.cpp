@@ -1,4 +1,6 @@
 #include <space_invaders/game/Squadron.hpp>
+#include <algorithm>
+#include <random>
 
 namespace space_invaders::game {
     Squadron::Squadron(
@@ -10,7 +12,8 @@ namespace space_invaders::game {
         float descentSpeed
     ) :
         rowIndex{0},
-        rowLimit{numberOfRows + static_cast<int>(ufo)}
+        rowLimit{numberOfRows + static_cast<int>(ufo)},
+        cooldown{0.0f}
     {
         // establishing positions
         this->waves = std::vector<Wave>();
@@ -67,9 +70,14 @@ namespace space_invaders::game {
 
     bool Squadron::isAlive() {return this->waves.at(this->rowIndex).isAlive();}
 
+    float Squadron::getCooldown() {return this->cooldown;}
+
+    void Squadron::setCooldown(float cooldown) {this->cooldown = cooldown;}
+
     void Squadron::moveShips(float time) {
         for (auto &wave : this->waves)
             wave.moveShips(time);
+        this->cooldown = std::max(this->cooldown - time, 0.0f);
     }
 
     int Squadron::checkState() {
@@ -81,6 +89,14 @@ namespace space_invaders::game {
             }
         }
         return 2;
+    }
+
+    void Squadron::analyze(PiggyBank &piggyBank) {
+        piggyBank.resetRow();
+        for (auto &wave : this->waves) {
+            piggyBank.refreshRow(wave.getAlive(), wave.getType());
+            piggyBank.nextRow();
+        }
     }
 
     int Squadron::killClosest(float x, float y) {
@@ -96,7 +112,15 @@ namespace space_invaders::game {
         return 1;
     }
 
-//    Bullet Squadron::randomShot() {
-//
-//    }
+    Bullet Squadron::randomShot() {
+        Bullet bullet(0.0f, 0.0f, 0);
+        std::random_device r;
+        std::default_random_engine d(r());
+        for (auto &wave : this->waves) {
+            bullet = wave.randomShot(d);
+            if (bullet.getTarget() != 0)
+                return bullet;
+        }
+        return bullet;
+    }
 }

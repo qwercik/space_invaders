@@ -1,7 +1,5 @@
 #pragma once
 
-#include <space_invaders/model/TexturedModel.hpp>
-
 namespace space_invaders::game {
     class Invader {
     public:
@@ -10,6 +8,5 @@ namespace space_invaders::game {
         bool alive;
         int type;
         int x;
-        float cooldown;
     };
 }

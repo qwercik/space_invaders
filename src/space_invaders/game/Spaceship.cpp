@@ -20,10 +20,9 @@ namespace space_invaders::game {
 
     void Spaceship::setCooldown(float cooldown) {this->cooldown = cooldown;}
 
-    bool Spaceship::isAlive() {
-        if (this->health == 0) return false;
-        else return true;
-    }
+    int Spaceship::getHealth() {return this->health;}
+
+    void Spaceship::setHealth(int value) {this->health = value;}
 
     void Spaceship::modifyHealth(int value) {
         if (this->health != -1) this->health = std::max(this->health + value, 0);
@@ -42,6 +41,6 @@ namespace space_invaders::game {
             this->x + time * this->speed * static_cast<float>(this->direction),
             static_cast<float>(this->gridWidth)
         ));
-        this->setCooldown(std::max(this->getCooldown() - time, 0.0f));
+        this->cooldown = std::max(this->cooldown - time, 0.0f);
     }
 }

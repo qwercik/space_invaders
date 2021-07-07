@@ -8,16 +8,18 @@
 namespace space_invaders::game {
     class BulletTracker {
     public:
-        BulletTracker(float bulletSpeed, float shotCooldown);
+        BulletTracker(float bulletSpeed, float spaceshipCooldown, float squadronCooldown);
         std::list<Bullet> *getBullets();
-        void shootInvaders(Spaceship *spaceship, float time);
-        void shootSpaceship(Squadron *squadron, float time);
-        void manageCollisions(Squadron *squadron, Spaceship *spaceship);
+        void shootInvaders(Spaceship &spaceship);
+        void shootSpaceship(Squadron &squadron);
+        void manageCollisions(Squadron &squadron, Spaceship &spaceship);
         void moveBullets(float time);
+        void clear();
 
     private:
         float bulletSpeed;
-        float shotCooldown;
+        float spaceshipCooldown;
+        float squadronCooldown;
         std::list<Bullet> bullets;
     };
 }

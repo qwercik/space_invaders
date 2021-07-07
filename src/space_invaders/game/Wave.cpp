@@ -1,4 +1,5 @@
 #include <space_invaders/game/Wave.hpp>
+#include <random>
 
 namespace space_invaders::game {
     Wave::Wave(
@@ -73,5 +74,16 @@ namespace space_invaders::game {
             }
         }
         return 1;
+    }
+
+    Bullet Wave::randomShot(std::default_random_engine &d) {
+        std::uniform_int_distribution<int> u(0, static_cast<int>(this->invaders.size()));
+        Bullet bullet(0.0f, 0.0f, 0);
+        for (auto &invader : this->invaders)
+            if (u(d) == 0 && invader.alive && invader.type != 3) {
+                bullet = Bullet(static_cast<float>(invader.x) + this->positionX, this->getY(), -1);
+                return bullet;
+            }
+        return bullet;
     }
 }

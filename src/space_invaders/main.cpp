@@ -20,6 +20,7 @@
 #include <space_invaders/game/Squadron.hpp>
 #include <space_invaders/game/Spaceship.hpp>
 #include <space_invaders/game/BulletTracker.hpp>
+#include <space_invaders/game/PiggyBank.hpp>
 
 
 using space_invaders::window::Window;
@@ -38,6 +39,7 @@ using space_invaders::game::Squadron;
 using space_invaders::game::Spaceship;
 using space_invaders::game::Bullet;
 using space_invaders::game::BulletTracker;
+using space_invaders::game::PiggyBank;
 
 const float INITIAL_FIELD_OF_VIEW = 50.0f;
 const float NEAR_CLIPPING_PANE = 0.02f;
@@ -57,7 +59,8 @@ const float INVADERS_SPEED = 0.3f;
 const int SPACESHIP_HEALTH = 3; // -1 to activate god mode
 const float SPACESHIP_SPEED = 6.0f;
 const float SHOT_SPEED = 6.0f;
-const float SHOT_COOLDOWN = 1.0f;
+const float SPACESHIP_SHOT_COOLDOWN = 1.0f;
+const float SQUADRON_SHOT_COOLDOWN = 1.0f;
 
 int main() {
     Squadron squadronTemplate(
@@ -70,7 +73,8 @@ int main() {
     );
     Squadron squadron = squadronTemplate;
     Spaceship spaceship(SPACESHIP_HEALTH, INVADERS_PER_ROW + 2 * MARGIN, SPACESHIP_SPEED);
-    BulletTracker bulletTracker(SHOT_SPEED, SHOT_COOLDOWN);
+    BulletTracker bulletTracker(SHOT_SPEED, SPACESHIP_SHOT_COOLDOWN, SQUADRON_SHOT_COOLDOWN);
+    PiggyBank piggyBank;
 
     unsigned screenWidth = 600;
     unsigned screenHeight = 600;
@@ -143,6 +147,8 @@ int main() {
 
             glUniformMatrix4fv(lambertShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
             glUniformMatrix4fv(lambertShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
+
+            squadron.resetInvader();
             do {
                 if (!squadron.isAlive()) continue;
                 glUniformMatrix4fv(lambertShaders.uniform("M"), 1, false, glm::value_ptr(
@@ -181,6 +187,7 @@ int main() {
             glUniformMatrix4fv(constantShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
             glUniformMatrix4fv(constantShaders.uniform("P"), 1, false, glm::value_ptr(perspectiveMatrix));
             glUniform4f(constantShaders.uniform("color"), 1.0f, 1.0f, 0.0f, 1.0f);
+
             for (auto &bullet : *bulletTracker.getBullets()) {
                 glUniformMatrix4fv(constantShaders.uniform("M"), 1, false, glm::value_ptr(
                     glm::translate(
@@ -194,17 +201,26 @@ int main() {
             if (viewShouldRotate) {
                 viewMatrix = glm::rotate(viewMatrix, glm::radians(0.5f), viewRotationVector);
             }
+
             squadron.moveShips(time);
             spaceship.move(time);
             bulletTracker.moveBullets(time);
 
-            bulletTracker.manageCollisions(&squadron, &spaceship);
+            bulletTracker.manageCollisions(squadron, spaceship);
+            bulletTracker.shootSpaceship(squadron);
 
-            squadron.resetInvader();
-            if (squadron.checkState() != 0) {
+            squadron.analyze(piggyBank);
+
+            int result = squadron.checkState();
+            if (result == 1 || spaceship.getHealth() == 0) {
                 squadron = squadronTemplate;
-                std::cout << "Game over";
+                spaceship.setHealth(SPACESHIP_HEALTH);
+                bulletTracker.clear();
+                piggyBank.resetPoints();
+                std::cout << std::endl << "Game over" << std::endl;
             }
+            if (result == 2) squadron = squadronTemplate;
+            std::cout << "\rPoints: " << piggyBank.getPoints() << " | Lives: " << spaceship.getHealth();
         })
         .onKey(GLFW_KEY_LEFT, GLFW_PRESS, [&]() {
             spaceship.setDirection(-1);
@@ -219,7 +235,7 @@ int main() {
             spaceship.modifyDirection(1);
         })
         .onKey(GLFW_KEY_SPACE, GLFW_PRESS, [&]() {
-            bulletTracker.shootInvaders(&spaceship, time);
+            bulletTracker.shootInvaders(spaceship);
         })
         .onKey(GLFW_KEY_UP, GLFW_REPEAT, [&]() {
             viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));

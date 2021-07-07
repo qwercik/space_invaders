@@ -8,7 +8,8 @@ namespace space_invaders::game {
         float getY();
         float getCooldown();
         void setCooldown(float cooldown);
-        bool isAlive();
+        int getHealth();
+        void setHealth(int value);
         void modifyHealth(int value);
         void setDirection(int direction);
         void modifyDirection(int modificator);
