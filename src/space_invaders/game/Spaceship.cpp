@@ -2,15 +2,31 @@
 #include <algorithm>
 
 namespace space_invaders::game {
-    Spaceship::Spaceship(int gridWidth, float speed) :
+    Spaceship::Spaceship(int health, int gridWidth, float speed) :
         gridWidth(gridWidth),
         x{static_cast<float>(gridWidth) / 2.0f},
-        health{3},
+        y{-1.0},
+        health{health},
         speed{speed},
-        direction{0}
+        direction{0},
+        cooldown{0.0f}
 {}
 
     float Spaceship::getX() {return this->x;}
+
+    float Spaceship::getY() {return this->y;}
+
+    float Spaceship::getCooldown() {return this->cooldown;}
+
+    void Spaceship::setCooldown(float cooldown) {this->cooldown = cooldown;}
+
+    int Spaceship::getHealth() {return this->health;}
+
+    void Spaceship::setHealth(int value) {this->health = value;}
+
+    void Spaceship::modifyHealth(int value) {
+        if (this->health != -1) this->health = std::max(this->health + value, 0);
+    }
 
     void Spaceship::setDirection(int direction) {this->direction = direction;}
 
@@ -25,5 +41,6 @@ namespace space_invaders::game {
             this->x + time * this->speed * static_cast<float>(this->direction),
             static_cast<float>(this->gridWidth)
         ));
+        this->cooldown = std::max(this->cooldown - time, 0.0f);
     }
 }

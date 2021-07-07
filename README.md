@@ -1,5 +1,11 @@
-# Space Invaders
+# Space Invaders :space_invader:
 3D adaptation of Space Invaders game
+
+## In game controls
+
+- :arrow_backward: :arrow_forward: | ship movement
+- :arrow_up_small: :arrow_down_small: | camera control
+- `SPACEBAR` | fire a projectile
 
 ## Build instructions
 To build the game run the following commands:

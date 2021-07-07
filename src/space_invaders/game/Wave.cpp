@@ -1,5 +1,5 @@
 #include <space_invaders/game/Wave.hpp>
-#include <space_invaders/game/Invader.hpp>
+#include <random>
 
 namespace space_invaders::game {
     Wave::Wave(
@@ -46,14 +46,42 @@ namespace space_invaders::game {
 
     float Wave::getY() {return positionY;}
 
+    bool Wave::isAlive() {return this->invaders.at(this->invaderIndex).alive;}
+
     void Wave::moveShips(float time) {
         positionX += (this->positiveDirection ? 1.0f : -1.0f) * this->speedX * time;
         if (this->margin < abs(this->positionX - this->margin)) {
+            this->positionX = this->positiveDirection ? 2.0f * this->margin : 0.0f;
             this->positiveDirection = !this->positiveDirection;
-            this->positionX +=
-                (this->positiveDirection ? -1.0f : 1.0f) *
-                (this->margin - abs(this->positionX - this->margin));
         }
         positionY -= this->speedY * time;
+    }
+
+    int Wave::killClosest(float x) {
+        for (auto &invader : this->invaders) {
+            switch (Bullet::checkYCollision(x - this->positionX, static_cast<float>(invader.x))) {
+                case -1:
+                    return -1;
+                case 0:
+                    if (invader.alive) {
+                        invader.alive = false;
+                        --this->invadersAlive;
+                        return 0;
+                    }
+                    break;
+            }
+        }
+        return 1;
+    }
+
+    Bullet Wave::randomShot(std::default_random_engine &d) {
+        std::uniform_int_distribution<int> u(0, static_cast<int>(this->invaders.size()));
+        Bullet bullet(0.0f, 0.0f, 0);
+        for (auto &invader : this->invaders)
+            if (u(d) == 0 && invader.alive && invader.type != 3) {
+                bullet = Bullet(static_cast<float>(invader.x) + this->positionX, this->getY(), -1);
+                return bullet;
+            }
+        return bullet;
     }
 }

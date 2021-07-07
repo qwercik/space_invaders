@@ -1,7 +1,5 @@
 #pragma once
 
-#include <space_invaders/model/TexturedModel.hpp>
-
 namespace space_invaders::game {
     class Invader {
     public:
