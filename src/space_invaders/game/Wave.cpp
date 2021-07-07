@@ -51,10 +51,8 @@ namespace space_invaders::game {
     void Wave::moveShips(float time) {
         positionX += (this->positiveDirection ? 1.0f : -1.0f) * this->speedX * time;
         if (this->margin < abs(this->positionX - this->margin)) {
+            this->positionX = this->positiveDirection ? 2.0f * this->margin : 0.0f;
             this->positiveDirection = !this->positiveDirection;
-            this->positionX +=
-                (this->positiveDirection ? -1.0f : 1.0f) *
-                (this->margin - abs(this->positionX - this->margin));
         }
         positionY -= this->speedY * time;
     }

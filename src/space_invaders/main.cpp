@@ -41,7 +41,7 @@ using space_invaders::game::Bullet;
 using space_invaders::game::BulletTracker;
 using space_invaders::game::PiggyBank;
 
-const float INITIAL_FIELD_OF_VIEW = 50.0f;
+const float INITIAL_FIELD_OF_VIEW = 55.0f;
 const float NEAR_CLIPPING_PANE = 0.02f;
 const float FAR_CLIPPING_PANE = 20.0f;
 
@@ -49,8 +49,8 @@ const int NUMBER_OF_ROWS = 6;
 const int INVADERS_PER_ROW = 10;
 const int MARGIN = 2;
 const bool UFO = true;
-const float DISTANCE_FROM_CENTER = -7.0f;
-const float GAME_HEIGHT = -2.0f;
+const float DISTANCE_FROM_CENTER = 2.0f;
+const float GAME_HEIGHT = -0.5f;
 const float SHIP_SIZE_MULTIPLIER = 0.5f;
 const float SHIP_GAP_MULTIPLIER = 1.0f;
 const float TRANSLATE_VALUE = SHIP_SIZE_MULTIPLIER * SHIP_GAP_MULTIPLIER;
@@ -107,26 +107,27 @@ int main() {
     TexturedModel mainShip("../models/main_ship.obj", "../textures/spaceship.png");
     BasicModel projectile("../models/projectile.obj");
 
-    float fieldOfView = INITIAL_FIELD_OF_VIEW;
     auto viewMatrix = glm::lookAt(
         glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, -7.0f),
+        glm::vec3(0.0f, 0.0f, -TRANSLATE_VALUE),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    auto perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screenRatio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
 
-    glm::mat4 gameModelMatrix = glm::mat4(1.0f);
-    gameModelMatrix = glm::translate(gameModelMatrix, glm::vec3(
-        -0.5f * (INVADERS_PER_ROW - 1 + 2 * MARGIN) * SHIP_SIZE_MULTIPLIER * SHIP_GAP_MULTIPLIER,
+
+    auto perspectiveMatrix = glm::perspective(glm::radians(INITIAL_FIELD_OF_VIEW), screenRatio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
+
+    auto gameModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(
+        0.0f,
         GAME_HEIGHT,
-        DISTANCE_FROM_CENTER
+        -DISTANCE_FROM_CENTER
     ));
-    gameModelMatrix = glm::rotate(gameModelMatrix, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    gameModelMatrix = glm::scale(gameModelMatrix, glm::vec3(SHIP_SIZE_MULTIPLIER));
+    auto squadronModelMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    auto modelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(SHIP_SIZE_MULTIPLIER));
 
-    auto viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
-    bool viewShouldRotate = false;
+    auto worldModelMatrix = glm::mat4(1.0f);
+
     float time;
+    int directionY = 0;
 
     window
         .onInit([]() {
@@ -136,6 +137,25 @@ int main() {
         .onLoop([&]() {
             time = static_cast<float>(glfwGetTime());
             glfwSetTime(0.0f);
+
+            if (directionY != 0) {
+                viewMatrix = glm::rotate(viewMatrix, glm::radians(0.1f), glm::vec3(
+                    directionY,
+                    0.0f,
+                    0.0f
+                ));
+                gameModelMatrix = glm::translate(gameModelMatrix, glm::vec3(
+                    0.0f,
+                    0.0f,
+                    static_cast<float>(directionY) * 0.01f
+                ));
+            }
+
+            worldModelMatrix = glm::translate(
+                glm::mat4(1.0f),
+                glm::vec3(-spaceship.getX() * TRANSLATE_VALUE, 0.0f, 0.0f)
+            );
+
             glDepthMask(GL_FALSE);
             cubeMapShaders.use();
             glUniformMatrix4fv(cubeMapShaders.uniform("V"), 1, false, glm::value_ptr(viewMatrix));
@@ -154,8 +174,8 @@ int main() {
                 glUniformMatrix4fv(lambertShaders.uniform("M"), 1, false, glm::value_ptr(
                     glm::translate(
                         glm::mat4(1.0f),
-                        glm::vec3(TRANSLATE_VALUE * squadron.getX(), TRANSLATE_VALUE * squadron.getY(), 0.0f)
-                    ) * gameModelMatrix
+                        glm::vec3(TRANSLATE_VALUE * squadron.getX(), 0.0f, -TRANSLATE_VALUE * squadron.getY())
+                    ) * worldModelMatrix * gameModelMatrix * squadronModelMatrix * modelMatrix
                 ));
 
                 switch (squadron.getType()) {
@@ -177,8 +197,8 @@ int main() {
             glUniformMatrix4fv(lambertShaders.uniform("M"), 1, false, glm::value_ptr(
                 glm::translate(
                     glm::mat4(1.0f),
-                    glm::vec3(TRANSLATE_VALUE * spaceship.getX(), TRANSLATE_VALUE * spaceship.getY(), 0.0f)
-                ) * gameModelMatrix
+                    glm::vec3(0.0f, 0.0f, -TRANSLATE_VALUE * spaceship.getY())
+                ) * gameModelMatrix * modelMatrix
             ));
             mainShip.draw(lambertShaders);
 
@@ -192,14 +212,10 @@ int main() {
                 glUniformMatrix4fv(constantShaders.uniform("M"), 1, false, glm::value_ptr(
                     glm::translate(
                         glm::mat4(1.0f),
-                        glm::vec3(TRANSLATE_VALUE * bullet.getX(), TRANSLATE_VALUE * bullet.getY(), 0.0f)
-                    ) * gameModelMatrix
+                        glm::vec3(TRANSLATE_VALUE * bullet.getX(), 0.0f, -TRANSLATE_VALUE * bullet.getY())
+                    ) * worldModelMatrix * gameModelMatrix * modelMatrix
                 ));
                 projectile.draw(constantShaders);
-            }
-
-            if (viewShouldRotate) {
-                viewMatrix = glm::rotate(viewMatrix, glm::radians(0.5f), viewRotationVector);
             }
 
             squadron.moveShips(time);
@@ -237,52 +253,15 @@ int main() {
         .onKey(GLFW_KEY_SPACE, GLFW_PRESS, [&]() {
             bulletTracker.shootInvaders(spaceship);
         })
-        .onKey(GLFW_KEY_UP, GLFW_REPEAT, [&]() {
-            viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+        .onKey(GLFW_KEY_UP, GLFW_PRESS, [&]() {directionY = 1;})
+        .onKey(GLFW_KEY_DOWN, GLFW_PRESS, [&]() {directionY = -1;})
+        .onKey(GLFW_KEY_UP, GLFW_RELEASE, [&]() {
+            directionY -= 1;
+            if (directionY < -1) directionY = -1;
         })
-        .onKey(GLFW_KEY_DOWN, GLFW_REPEAT, [&]() {
-            viewMatrix = glm::rotate(viewMatrix, glm::radians(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        })
-        .onKey(GLFW_KEY_Z, GLFW_REPEAT, [&]() {
-            fieldOfView += 1.0f;
-            perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screenRatio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
-        })
-        .onKey(GLFW_KEY_X, GLFW_REPEAT, [&]() {
-            fieldOfView -= 1.0f;
-            perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screenRatio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
-        })
-        .onMouseMove([&](double y, double x) {
-            viewShouldRotate = true;
-
-            if (x < screenWidth / 4) {
-                viewRotationVector = glm::vec3(0.0f, -1.0f, 0.0f);
-            } else if (x > 3 * screenWidth / 4) {
-                viewRotationVector = glm::vec3(0.0f, 1.0f, 0.0f);
-            } else {
-                viewRotationVector = glm::vec3(0.0f, 0.0f, 0.0f);
-                viewShouldRotate = false;
-            }
-        })
-        .onMouseLeave([]() {
-            std::cout << "Mouse has left window area\n";
-        })
-        .onMouseEnter([]() {
-            std::cout << "Mouse has came back to window area\n";
-        })
-        .onMouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, []() {
-            std::cout << "Left mouse button clicked\n";
-        })
-        .onMouseButton(GLFW_MOUSE_BUTTON_RIGHT, GLFW_PRESS, []() {
-            std::cout << "Right mouse button clicked\n";
-        })
-        .onScroll([&](double y, double x) {
-            if (y < 0) {
-                fieldOfView += 1.0f;
-                perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screenRatio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
-            } else if (y > 0) {
-                fieldOfView -= 1.0f;
-                perspectiveMatrix = glm::perspective(glm::radians(fieldOfView), screenRatio, NEAR_CLIPPING_PANE, FAR_CLIPPING_PANE);
-            }
+        .onKey(GLFW_KEY_DOWN, GLFW_RELEASE, [&]() {
+            directionY += 1;
+            if (directionY > 1) directionY = 1;
         })
         ;
 
